@@ -16,5 +16,9 @@ module priceless::admin_cap {
             id: object::new(ctx)
         }
     }
+
+    public(package) fun get_admin_cap_id(admin_cap: &AdminCap): ID {
+        object::id(admin_cap)
+    }
  
 }

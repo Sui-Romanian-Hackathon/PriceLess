@@ -1,11 +1,11 @@
 [package]
-name = "ron"
+name = "priceless"
 edition = "2024.beta" # edition = "legacy" to use legacy (pre-2024) Move
-published-at = "0xd071696d8eaa7fae888e3c239c7339fe067167f6c2f12bbeb39d3b729a4fb23f"
 # license = ""           # e.g., "MIT", "GPL", "Apache 2.0"
 # authors = ["..."]      # e.g., ["Joe Smith (joesmith@noemail.com)", "John Snow (johnsnow@noemail.com)"]
 
 [dependencies]
+ron = { local = "../ron" }
 
 # For remote import, use the `{ git = "...", subdir = "...", rev = "..." }`.
 # Revision can be a branch, a tag, and a commit hash.
@@ -19,6 +19,7 @@ published-at = "0xd071696d8eaa7fae888e3c239c7339fe067167f6c2f12bbeb39d3b729a4fb2
 # Override = { local = "../conflicting/version", override = true }
 
 [addresses]
+priceless = "0x0"
 ron = "0xd071696d8eaa7fae888e3c239c7339fe067167f6c2f12bbeb39d3b729a4fb23f"
 
 # Named addresses will be accessible in Move as `@name`. They're also exported:

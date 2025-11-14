@@ -2,13 +2,14 @@
 
 [move]
 version = 3
-manifest_digest = "AC9461F7BE842EBD76AB284C5CA21D8833FDBDAAA0C99E208FBF913F21E34BF7"
-deps_digest = "F9B494B64F0615AED0E98FC12A85B85ECD2BC5185C22D30E7F67786BB52E507C"
+manifest_digest = "EF82FFDF34FB9E6F34AF25CD79D63D6B1E65B5AD945FA9F7D1F2E73255B13EF2"
+deps_digest = "397E6A9F7A624706DBDFEE056CE88391A15876868FD18A88504DA74EB458D697"
 dependencies = [
   { id = "Bridge", name = "Bridge" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
   { id = "SuiSystem", name = "SuiSystem" },
+  { id = "ron", name = "ron" },
 ]
 
 [[move.package]]
@@ -42,15 +43,18 @@ dependencies = [
   { id = "Sui", name = "Sui" },
 ]
 
+[[move.package]]
+id = "ron"
+source = { local = "../ron" }
+
+dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
+]
+
 [move.toolchain-version]
 compiler-version = "1.60.0"
 edition = "2024.beta"
 flavor = "sui"
-
-[env]
-
-[env.testnet]
-chain-id = "4c78adac"
-original-published-id = "0xd071696d8eaa7fae888e3c239c7339fe067167f6c2f12bbeb39d3b729a4fb23f"
-latest-published-id = "0xd071696d8eaa7fae888e3c239c7339fe067167f6c2f12bbeb39d3b729a4fb23f"
-published-version = "1"

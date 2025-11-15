@@ -15,7 +15,7 @@ const AGENT1 = process.env.AGENT1;
 const SHOP_ID = process.env.SHOP_ID;
 const BUY_OFFER_ID = process.env.BUY_OFFER_ID;
 
-const PRICE = 4000; // Price in RON tokens
+const PRICE = 6000; // Price in RON tokens
 const STORE_LINK = 'https://example.com/product';
 
 async function makeSellOffer() {

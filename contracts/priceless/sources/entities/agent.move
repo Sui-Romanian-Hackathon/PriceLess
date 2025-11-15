@@ -58,10 +58,11 @@ module priceless::agent {
         };
 
         let agent_id = object::id(&agent);
+        let agent_object_address = object::id_to_address(&agent_id);
         add_agent(platform_registry, caller, agent_id);
         transfer::share_object(agent);
 
-        emit_agent_registered(agent_id, caller, stake_amount, clock::timestamp_ms(clock));
+        emit_agent_registered(agent_id, agent_object_address, caller, stake_amount, clock::timestamp_ms(clock));
     }
 
     public fun unstake(agent: &mut Agent, 

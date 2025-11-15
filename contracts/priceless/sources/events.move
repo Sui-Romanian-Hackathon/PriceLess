@@ -4,7 +4,8 @@ module priceless::events {
 
     public struct AgentRegistered has copy, drop {
         agent_id: ID,
-        agent_address: address,
+        agent_object_address: address,
+        agent_owner_address: address,
         stake_amount: u64,
         timestamp: u64,
     }
@@ -18,7 +19,8 @@ module priceless::events {
 
     public struct UserRegistered has copy, drop {
         user_id: ID,
-        user_address: address,
+        user_object_address: address,
+        user_owner_address: address,
         subscription_fee: u64,
         subscription_deadline: u64,
         timestamp: u64,
@@ -108,13 +110,15 @@ module priceless::events {
     
     public(package) fun emit_agent_registered(
         agent_id: ID,
-        agent_address: address,
+        agent_object_address: address,
+        agent_owner_address: address,
         stake_amount: u64,
         timestamp: u64,
     ) {
         event::emit(AgentRegistered {
             agent_id,
-            agent_address,
+            agent_object_address,
+            agent_owner_address,
             stake_amount,
             timestamp,
         });
@@ -136,14 +140,16 @@ module priceless::events {
 
     public(package) fun emit_user_registered(
         user_id: ID,
-        user_address: address,
+        user_object_address: address,
+        user_owner_address: address,
         subscription_fee: u64,
         subscription_deadline: u64,
         timestamp: u64,
     ) {
         event::emit(UserRegistered {
             user_id,
-            user_address,
+            user_object_address,
+            user_owner_address,
             subscription_fee,
             subscription_deadline,
             timestamp,

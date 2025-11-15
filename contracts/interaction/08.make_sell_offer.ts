@@ -10,12 +10,12 @@ config({ path: path.join(__dirname, '..', '.env') });
 const NETWORK = process.env.NETWORK;
 const PRICELESS_PACKAGE = process.env.PRICELESS_PACKAGE;
 const PLATFORM_REGISTRY = process.env.PLATFORM_REGISTRY;
-const USER_ID = process.env.USER_ID;
+const USER_ADDR = process.env.USER_ADDR;
 const AGENT1 = process.env.AGENT1;
-const SHOP_ID = process.env.SHOP_ID;
+const SHOP = process.env.SHOP;
 const BUY_OFFER_ID = process.env.BUY_OFFER_ID;
 
-const PRICE = 6000; // Price in RON tokens
+const PRICE = 60_00; // Price in RON tokens
 const STORE_LINK = 'https://example.com/product';
 
 async function makeSellOffer() {
@@ -33,9 +33,9 @@ async function makeSellOffer() {
         console.log(`  Priceless Package: ${PRICELESS_PACKAGE}`);
         console.log(`  Platform Registry: ${PLATFORM_REGISTRY}`);
         console.log(`  Buy Offer ID: ${BUY_OFFER_ID}`);
-        console.log(`  User ID: ${USER_ID}`);
+        console.log(`  User ID: ${USER_ADDR}`);
         console.log(`  Agent ID: ${AGENT1}`);
-        console.log(`  Shop ID: ${SHOP_ID}`);
+        console.log(`  Shop ID: ${SHOP}`);
         console.log(`  Price: ${PRICE} RON`);
         console.log(`  Store Link: ${STORE_LINK}`);
 
@@ -49,11 +49,11 @@ async function makeSellOffer() {
             arguments: [
                 tx.object(PLATFORM_REGISTRY!),
                 tx.pure.id(BUY_OFFER_ID!),
-                tx.object(USER_ID!),
+                tx.object(USER_ADDR!),
                 tx.object(AGENT1!),
                 tx.pure.string(STORE_LINK),
                 tx.pure.u64(PRICE),
-                tx.object(SHOP_ID!),
+                tx.object(SHOP!),
                 tx.object(SUI_CLOCK_OBJECT_ID),
             ],
         });

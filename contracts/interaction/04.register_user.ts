@@ -143,7 +143,7 @@ async function registerUser() {
                     // Highlight the created User object
                     if (change.type === 'created' && change.objectType?.includes('User')) {
                         console.log(`\n  👤 User Object ID: ${change.objectId}`);
-                        console.log(`     Add this to your .env file as USER_ID`);
+                        console.log(`     Add this to your .env file as USER_ADDR`);
                     }
                 });
             }

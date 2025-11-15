@@ -11,7 +11,7 @@ const NETWORK = process.env.NETWORK;
 const RON_PACKAGE_ID = process.env.RON_PACKAGE_ID;
 const PRICELESS_PACKAGE = process.env.PRICELESS_PACKAGE;
 const PLATFORM_REGISTRY = process.env.PLATFORM_REGISTRY;
-const USER_ID = process.env.USER_ID;
+const USER_ADDR = process.env.USER_ADDR;
 
 const PRICE = 50_00; // 50 RON tokens
 const PRODUCT_NAME = 'A';
@@ -31,7 +31,7 @@ async function createBuyOffer() {
         console.log(`📋 Using configuration:`);
         console.log(`  Priceless Package: ${PRICELESS_PACKAGE}`);
         console.log(`  Platform Registry: ${PLATFORM_REGISTRY}`);
-        console.log(`  User ID: ${USER_ID}`);
+        console.log(`  User ID: ${USER_ADDR}`);
         console.log(`  Product: ${PRODUCT_NAME}`);
         console.log(`  Price: ${PRICE} RON`);
         console.log(`  Offer Type: PriceBased`);
@@ -105,7 +105,7 @@ async function createBuyOffer() {
             target: `${PRICELESS_PACKAGE}::core_logic::create_buy_offer`,
             arguments: [
                 tx.object(PLATFORM_REGISTRY!),
-                tx.object(USER_ID!),
+                tx.object(USER_ADDR!),
                 tx.pure.string(PRODUCT_NAME),
                 priceBalance,
                 offerType,

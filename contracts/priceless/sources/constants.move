@@ -1,6 +1,6 @@
 module priceless::constants {
     
-    const VERSION: u64 = 6;
+    const VERSION: u64 = 1;
     const AGENT_STAKE_AMOUNT: u64 = 500_000_000;
     const USER_MONTHLY_SUBSCRIPTION_COST: u64 = 10_00;
     const USER_YEARLY_SUBSCRIPTION_COST: u64 = 100_00;

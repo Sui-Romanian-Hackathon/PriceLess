@@ -72,10 +72,12 @@ module priceless::user {
         };
 
         let user_id = object::id(&user);
+        let user_object_address = object::id_to_address(&user_id);
         add_user(platform_registry, caller, user_id);
         
         emit_user_registered(
             user_id,
+            user_object_address,
             caller,
             subscription_fee,
             subscription_deadline,

@@ -75,7 +75,7 @@ async function createShop() {
                     // Highlight the created Shop object
                     if (change.type === 'created' && change.objectType?.includes('Shop')) {
                         console.log(`\n  🏪 Shop Object ID: ${change.objectId}`);
-                        console.log(`     Add this to your .env file as SHOP_ID`);
+                        console.log(`     Add this to your .env file as SHOP`);
                     }
                 });
             }

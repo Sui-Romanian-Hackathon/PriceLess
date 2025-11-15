@@ -265,7 +265,7 @@ module priceless::core_logic {
             (percentage_denominator + platform_registry.get_manual_fee_percentage()) / percentage_denominator;
 
         assert!(sell_offer_value == 
-                balance::value(&buy_price_balance) +  balance::value(&price_difference));
+                balance::value(&buy_price_balance) +  balance::value(&price_difference), get_EIncorrectAmount());
 
         // Add all balances
         balance::join(&mut buy_price_balance, price_difference);

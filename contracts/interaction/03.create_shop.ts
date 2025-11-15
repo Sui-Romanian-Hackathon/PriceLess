@@ -1,5 +1,4 @@
 import { Transaction } from '@mysten/sui/transactions';
-import * as fs from 'fs';
 import * as path from 'path';
 import { initializeSui, checkBalance, displayTransactionResults } from './utils/utils';
 import { config } from 'dotenv';
@@ -8,38 +7,33 @@ import { config } from 'dotenv';
 config({ path: path.join(__dirname, '..', '.env') });
 
 const NETWORK = process.env.NETWORK;
-const RON_PACKAGE_ID = process.env.RON_PACKAGE_ID;
-const RON_TREASURY_CAP_ID = process.env.RON_TREASURY_CAP_ID;
+const PRICELESS_PACKAGE = process.env.PRICELESS_PACKAGE;
+const ADMIN_CAP_ID = process.env.ADMIN_CAP_ID;
 
-
-async function mintRON() {
-    const targetPackage = RON_PACKAGE_ID;
-    const targetTreasuryCap = RON_TREASURY_CAP_ID;
-    
-    console.log(`Minting RON`);
+async function createShop() {
+    console.log(`Creating Shop`);
 
     try {
         const { client, keypair, address } = await initializeSui(NETWORK);
 
-        console.log(`📝 Claiming from address: ${address}`);
+        console.log(`📝 Creating shop from address: ${address}`);
 
         // Check balance
         await checkBalance(client, address, 100000000);
 
         console.log(`📋 Using configuration:`);
-        console.log(`  RON Package: ${targetPackage}`);
-        console.log(`  RON Treasury Cap: ${targetTreasuryCap}`);
+        console.log(`  Priceless Package: ${PRICELESS_PACKAGE}`);
+        console.log(`  Admin Cap ID: ${ADMIN_CAP_ID}`);
 
         // Create transaction
         const tx = new Transaction();
 
-        // Call claim function
+        // Call create_and_share_shop
+        console.log(`📞 Calling create_and_share_shop...`);
         tx.moveCall({
-            target: `${RON_PACKAGE_ID}::ron::mint`,
+            target: `${PRICELESS_PACKAGE}::mock_shop_buy::create_and_share_shop`,
             arguments: [
-                tx.object(targetTreasuryCap!),
-                tx.pure.u64(10000_00),  // 10_000 RON
-                tx.object(address), 
+                tx.pure.id(ADMIN_CAP_ID!),
             ],
         });
 
@@ -47,7 +41,7 @@ async function mintRON() {
         tx.setGasBudget(100000000); // 0.1 SUI
 
         // Execute transaction
-        console.log('📤 Submitting claim transaction...');
+        console.log('📤 Submitting create shop transaction...');
         const result = await client.signAndExecuteTransaction({
             signer: keypair,
             transaction: tx,
@@ -59,11 +53,11 @@ async function mintRON() {
         });
 
         // Display transaction results
-        const success = displayTransactionResults(result, 'Claim transaction');
-        
+        const success = displayTransactionResults(result, 'Create Shop transaction');
+
         if (success) {
-            console.log(`🎉 Successfully claimed rewards!`);
-            
+            console.log(`🎉 Successfully created shop!`);
+
             // Display events if any
             if (result.events && result.events.length > 0) {
                 console.log('\n📋 Events:');
@@ -71,23 +65,29 @@ async function mintRON() {
                     console.log(`  Event ${index + 1}:`, JSON.stringify(event, null, 2));
                 });
             }
-            
+
             // Display object changes
             if (result.objectChanges && result.objectChanges.length > 0) {
                 console.log('\n📋 Object Changes:');
                 result.objectChanges.forEach((change: any) => {
-                    console.log(`  ${change.type}: ${change.objectType} - ${change.objectId}`);
+                    console.log(`  ${change.type}: ${change.objectType || 'N/A'} - ${change.objectId}`);
+                    
+                    // Highlight the created Shop object
+                    if (change.type === 'created' && change.objectType?.includes('Shop')) {
+                        console.log(`\n  🏪 Shop Object ID: ${change.objectId}`);
+                        console.log(`     Add this to your .env file as SHOP_ID`);
+                    }
                 });
             }
         }
     } catch (error) {
-        console.error('Error minting RON:', error);
+        console.error('Error creating shop:', error);
         process.exit(1);
-    };
+    }
 }
 
 if (require.main === module) {
-    mintRON();
+    createShop();
 }
 
-export { mintRON };
+export { createShop };

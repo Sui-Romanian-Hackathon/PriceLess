@@ -126,4 +126,12 @@ module priceless::buy_offer {
         buy_offer.owner
     }
 
+    public fun get_time_based_offer(): BuyOfferType {
+        BuyOfferType::TimeBased
+    }
+
+    public fun get_price_based_offer(): BuyOfferType {
+        BuyOfferType::PriceBased
+    }
+
 }

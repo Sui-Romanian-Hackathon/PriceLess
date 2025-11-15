@@ -74,6 +74,8 @@ module priceless::core_logic {
         emit_sell_offer_made,
         emit_manual_buy,
         emit_service_buy,
+        emit_automatic_buy,
+        emit_buy_offer_deleted,
     };
 
 
@@ -316,6 +318,7 @@ module priceless::core_logic {
 
         let buy_offer_owned = remove_buy_offer_from_platform_registry(platform_registry, buy_offer_id);    
         assert!(is_time_based(&buy_offer_owned), get_EInvalidBuyOffer());
+
         assert!(clock::timestamp_ms(clock) > get_buy_offer_deadline(&buy_offer_owned));
 
         // TODO: Assert offer is cheapest 
@@ -356,6 +359,8 @@ module priceless::core_logic {
 
     }
 
+    //TODO: Add service_return function
+
     fun buy_internal(
         platform_registry: &mut PlatformRegistry,
         user: &mut User,
@@ -366,10 +371,24 @@ module priceless::core_logic {
         price: u64,
         store_link: String,
     ) {
+        let buyer = get_owner(&buy_offer);
+        let agent_id = object::id(agent);
         let price_difference = get_buy_offer_price(&buy_offer) - price;
         let percentage_denominator = get_PERCENTAGE_DENOMINATOR();
         let agent_fee = price_difference * get_agent_fee_percentage(platform_registry) / percentage_denominator;
         let platform_fee = price_difference * get_platform_fee_percentage(platform_registry) / percentage_denominator;
+        let buyer_savings = price_difference - agent_fee - platform_fee;
+
+        emit_automatic_buy(
+            buy_offer_id,
+            buyer,
+            agent_id,
+            store_link,
+            price,
+            agent_fee,
+            platform_fee,
+            buyer_savings,
+        );
 
         let mut buy_price_balance = get_buy_offer_price_balance(&mut buy_offer);
         let mut price_difference_balance = balance::split(&mut buy_price_balance, price_difference);
@@ -398,7 +417,15 @@ module priceless::core_logic {
         buy_offer: BuyOffer,
         ): Balance<RON> {
 
+        let owner = get_owner(&buy_offer);
         let (id, balance, sell_offers, sell_offers_owner_ids) = destroy_buy_offer(buy_offer);
+        let remaining_balance = balance::value(&balance);
+
+        emit_buy_offer_deleted(
+            buy_offer_id,
+            owner,
+            remaining_balance,
+        );
 
         remove_buy_offer_from_user(user, buy_offer_id);
         drop_offers_data(sell_offers, sell_offers_owner_ids);

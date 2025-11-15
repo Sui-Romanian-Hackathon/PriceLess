@@ -20,7 +20,7 @@ module priceless::mock_shop_buy {
         buy_action: Table<String, Balance<RON>>
     }
 
-    public(package) fun create_and_share_shop(admin_cap_id: ID, ctx: &mut TxContext) {
+    public fun create_and_share_shop(admin_cap_id: ID, ctx: &mut TxContext) {
         let shop = Shop {
             id: object::new(ctx),
             admin: admin_cap_id, 

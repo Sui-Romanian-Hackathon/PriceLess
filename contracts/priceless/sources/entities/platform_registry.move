@@ -88,6 +88,16 @@ module priceless::platform_registry {
         platform_registry.monitor_address = address;
     }
 
+    public fun set_fee_percentages(
+        _ : &AdminCap, 
+        platform_registry: &mut PlatformRegistry,
+        agent_fee_percentage: u64,
+        platform_fee_percentage: u64,
+        ) {
+        platform_registry.agent_fee_percentage = agent_fee_percentage;
+        platform_registry.platform_fee_percentage = platform_fee_percentage;
+    }
+
     public fun get_monitor_address(platform_registry: &mut PlatformRegistry): address {
         platform_registry.monitor_address  
     }

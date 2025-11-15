@@ -9,32 +9,38 @@ config({ path: path.join(__dirname, '..', '.env') });
 
 const NETWORK = process.env.NETWORK;
 const RON_PACKAGE_ID = process.env.RON_PACKAGE_ID;
-const priceless_PACKAGE = process.env.priceless_PACKAGE;
+const PRICELESS_PACKAGE = process.env.PRICELESS_PACKAGE;
 const PLATFORM_REGISTRY = process.env.PLATFORM_REGISTRY;
+const USER_ID = process.env.USER_ID;
 
-const STAKE_AMOUNT = 500_000_000; // 5,000,000 RON tokens (with 2 decimals)
+const PRICE = 50_00; // 50 RON tokens
+const PRODUCT_NAME = 'A';
+const DEADLINE = 1826224527; // Deadline timestamp in milliseconds
 
-async function registerAgent() {
-    console.log(`Registering Agent`);
+async function createBuyOffer() {
+    console.log(`Creating Buy Offer`);
 
     try {
         const { client, keypair, address } = await initializeSui(NETWORK);
 
-        console.log(`📝 Registering agent from address: ${address}`);
+        console.log(`📝 Creating buy offer from address: ${address}`);
 
         // Check balance
         await checkBalance(client, address, 100000000);
 
         console.log(`📋 Using configuration:`);
-        console.log(`  priceless Package: ${priceless_PACKAGE}`);
+        console.log(`  Priceless Package: ${PRICELESS_PACKAGE}`);
         console.log(`  Platform Registry: ${PLATFORM_REGISTRY}`);
-        console.log(`  Stake Amount: ${STAKE_AMOUNT} raw units (${STAKE_AMOUNT / 100} RON with 2 decimals)`);
+        console.log(`  User ID: ${USER_ID}`);
+        console.log(`  Product: ${PRODUCT_NAME}`);
+        console.log(`  Price: ${PRICE} RON`);
+        console.log(`  Offer Type: PriceBased`);
+        console.log(`  Deadline: ${DEADLINE}`);
 
         // Get all RON coins owned by the address
         const ronType = `${RON_PACKAGE_ID}::ron::RON`;
-        const coinType = `0x2::coin::Coin<${ronType}>`;
 
-        console.log(`🔍 Looking for RON coins of type: ${coinType}`);
+        console.log(`🔍 Looking for RON coins of type: ${ronType}`);
 
         const coins = await client.getCoins({
             owner: address,
@@ -49,10 +55,10 @@ async function registerAgent() {
 
         // Calculate total balance
         const totalBalance = coins.data.reduce((sum, coin) => sum + BigInt(coin.balance), BigInt(0));
-        console.log(`💰 Total RON balance: ${totalBalance} raw units (${Number(totalBalance) / 100} RON with 2 decimals)`);
+        console.log(`💰 Total RON balance: ${totalBalance} raw units`);
 
-        if (totalBalance < BigInt(STAKE_AMOUNT)) {
-            throw new Error(`Insufficient RON balance. Required: ${STAKE_AMOUNT}, Available: ${totalBalance}`);
+        if (totalBalance < BigInt(PRICE)) {
+            throw new Error(`Insufficient RON balance. Required: ${PRICE}, Available: ${totalBalance}`);
         }
 
         // Create transaction
@@ -76,25 +82,35 @@ async function registerAgent() {
             }
         }
 
-        // Split the exact amount needed for staking
-        console.log(`✂️  Splitting ${STAKE_AMOUNT} from RON coin...`);
-        const [stakeCoin] = tx.splitCoins(ronCoin, [tx.pure.u64(STAKE_AMOUNT)]);
+        // Split the exact amount needed for the buy offer
+        console.log(`✂️  Splitting ${PRICE} from RON coin...`);
+        const [priceCoin] = tx.splitCoins(ronCoin, [tx.pure.u64(PRICE)]);
 
-        // Convert the coin to balance and call register_agent
-        const stakeBalance = tx.moveCall({
+        // Convert coin to balance
+        const priceBalance = tx.moveCall({
             target: '0x2::coin::into_balance',
             typeArguments: [ronType],
-            arguments: [stakeCoin],
+            arguments: [priceCoin],
         });
 
-        // Call register_agent
-        console.log(`📞 Calling register_agent...`);
+        // Get PriceBased offer type
+        const offerType = tx.moveCall({
+            target: `${PRICELESS_PACKAGE}::buy_offer::get_price_based_offer`,
+            arguments: [],
+        });
+
+        // Call create_buy_offer
+        console.log(`📞 Calling create_buy_offer...`);
         tx.moveCall({
-            target: `${priceless_PACKAGE}::agent::register_agent`,
+            target: `${PRICELESS_PACKAGE}::core_logic::create_buy_offer`,
             arguments: [
                 tx.object(PLATFORM_REGISTRY!),
-                stakeBalance,
+                tx.object(USER_ID!),
+                tx.pure.string(PRODUCT_NAME),
+                priceBalance,
+                offerType,
                 tx.object(SUI_CLOCK_OBJECT_ID),
+                tx.pure.u64(DEADLINE),
             ],
         });
 
@@ -102,7 +118,7 @@ async function registerAgent() {
         tx.setGasBudget(100000000); // 0.1 SUI
 
         // Execute transaction
-        console.log('📤 Submitting register_agent transaction...');
+        console.log('📤 Submitting create_buy_offer transaction...');
         const result = await client.signAndExecuteTransaction({
             signer: keypair,
             transaction: tx,
@@ -114,10 +130,10 @@ async function registerAgent() {
         });
 
         // Display transaction results
-        const success = displayTransactionResults(result, 'Register Agent transaction');
+        const success = displayTransactionResults(result, 'Create Buy Offer transaction');
 
         if (success) {
-            console.log(`🎉 Successfully registered as agent!`);
+            console.log(`🎉 Successfully created buy offer!`);
 
             // Display events if any
             if (result.events && result.events.length > 0) {
@@ -132,17 +148,23 @@ async function registerAgent() {
                 console.log('\n📋 Object Changes:');
                 result.objectChanges.forEach((change: any) => {
                     console.log(`  ${change.type}: ${change.objectType || 'N/A'} - ${change.objectId}`);
+                    
+                    // Highlight the created BuyOffer object
+                    if (change.type === 'created' && change.objectType?.includes('BuyOffer')) {
+                        console.log(`\n  🛒 Buy Offer Object ID: ${change.objectId}`);
+                        console.log(`     Add this to your .env file as BUY_OFFER_ID`);
+                    }
                 });
             }
         }
     } catch (error) {
-        console.error('Error registering agent:', error);
+        console.error('Error creating buy offer:', error);
         process.exit(1);
     }
 }
 
 if (require.main === module) {
-    registerAgent();
+    createBuyOffer();
 }
 
-export { registerAgent };
+export { createBuyOffer };

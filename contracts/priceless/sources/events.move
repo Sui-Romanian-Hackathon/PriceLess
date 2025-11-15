@@ -79,6 +79,23 @@ module priceless::events {
         platform_fee: u64,
         buyer_savings: u64,
     }
+
+    public struct AutomaticBuy has copy, drop {
+        buy_offer_id: ID,
+        buyer: address,
+        agent_id: ID,
+        store_link: std::string::String,
+        product_price: u64,
+        agent_fee: u64,
+        platform_fee: u64,
+        buyer_savings: u64,
+    }
+
+    public struct BuyOfferDeleted has copy, drop {
+        buy_offer_id: ID,
+        owner: address,
+        remaining_balance: u64,
+    }
     
     public(package) fun emit_agent_registered(
         agent_id: ID,
@@ -233,6 +250,40 @@ module priceless::events {
             agent_fee,
             platform_fee,
             buyer_savings,
+        });
+    }
+
+    public(package) fun emit_automatic_buy(
+        buy_offer_id: ID,
+        buyer: address,
+        agent_id: ID,
+        store_link: std::string::String,
+        product_price: u64,
+        agent_fee: u64,
+        platform_fee: u64,
+        buyer_savings: u64,
+    ) {
+        event::emit(AutomaticBuy {
+            buy_offer_id,
+            buyer,
+            agent_id,
+            store_link,
+            product_price,
+            agent_fee,
+            platform_fee,
+            buyer_savings,
+        });
+    }
+
+    public(package) fun emit_buy_offer_deleted(
+        buy_offer_id: ID,
+        owner: address,
+        remaining_balance: u64,
+    ) {
+        event::emit(BuyOfferDeleted {
+            buy_offer_id,
+            owner,
+            remaining_balance,
         });
     }
 }

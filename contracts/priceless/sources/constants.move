@@ -1,9 +1,9 @@
 module priceless::constants {
     
-    const VERSION: u64 = 2;
+    const VERSION: u64 = 5;
     const AGENT_STAKE_AMOUNT: u64 = 500_000_000;
-    const USER_MONTHLY_SUBSCRIPTION_COST: u64 = 10;
-    const USER_YEARLY_SUBSCRIPTION_COST: u64 = 100;
+    const USER_MONTHLY_SUBSCRIPTION_COST: u64 = 10_00;
+    const USER_YEARLY_SUBSCRIPTION_COST: u64 = 100_00;
     const PERCENTAGE_DENOMINATOR: u64 = 10_000;
     const MANUAL_BUY_FEE_PERCENTAGE: u64 = 500;
     const AGENT_FEE_PERCENTAGE: u64 = 5_000;  // Agent fee percentage

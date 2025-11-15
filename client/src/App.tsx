@@ -12,8 +12,7 @@ import HomePage from './pages/HomePage';
 import AccessGate from './pages/AccessGate';
 import Profile from './pages/Profile';
 import ProductsPage from './pages/ProductsPage';
-import CounterPage from './pages/CounterPage';
-import { UserMarketProvider } from './context/UserMArketContext';
+import { UserMarketProvider } from './context/UserMarketContext';
 
 
 const App: FC = () => {
@@ -39,7 +38,6 @@ const App: FC = () => {
             
             {/* Products Page is restricted to users with active access */}
             <Route path="/products" element={<ProductsPage />} /> 
-            <Route path="/counter" element={<CounterPage />} /> 
             
             <Route path="*" element={<div className="p-10 text-center text-xl font-bold">404 - Page Not Found</div>} />
           </Routes>

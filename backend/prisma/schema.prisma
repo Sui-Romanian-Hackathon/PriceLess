@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String   @id @default(cuid())
+  user_id               String   @unique // ObjectID from Sui
+  user_object_address   String   @unique // SuiAddress
+  user_owner_address    String   @unique @db.VarChar(66) // Wallet address
+  subscription_fee      BigInt   // u64 from Sui
+  subscription_deadline BigInt   // u64 timestamp
+  timestamp             BigInt   // u64 timestamp
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  buyOffers   BuyOffer[]
+  manualBuys  ManualBuy[]
+
+  @@index([user_owner_address])
+  @@map("users")
+}
+
+model BuyOffer {
+  id                        String   @id @default(cuid())
+  buy_offer_id              String   @unique // From Sui blockchain
+  owner                     String   @db.VarChar(66) // Wallet address
+  product                   String
+  price                     BigInt   // Using BigInt for i64
+  offer_type_is_time_based  Boolean
+  deadline                  BigInt   // Timestamp
+  created_at                BigInt   // Timestamp from blockchain
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  // Relations
+  user        User?        @relation(fields: [owner], references: [user_owner_address])
+  sellOffers  SellOffer[]
+  manualBuys  ManualBuy[]
+
+  @@index([buy_offer_id])
+  @@index([owner])
+  @@index([deadline])
+  @@map("buy_offers")
+}
+
+model SellOffer {
+  id              String   @id @default(cuid())
+  buy_offer_id    String
+  sell_offer_id   String   @unique // From Sui blockchain
+  agent_id        String
+  agent_address   String   @db.VarChar(66) // Wallet address
+  store_link      String
+  price           BigInt   // Using BigInt for i64
+  is_update       Boolean
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  buyOffer      BuyOffer       @relation(fields: [buy_offer_id], references: [buy_offer_id])
+  manualBuys    ManualBuy[]
+  shopPurchases ShopPurchase[]
+
+  @@index([sell_offer_id])
+  @@index([buy_offer_id])
+  @@index([agent_id])
+  @@index([agent_address])
+  @@map("sell_offers")
+}
+
+model ManualBuy {
+  id              String   @id @default(cuid())
+  buy_offer_id    String
+  buyer           String   @db.VarChar(66) // Wallet address
+  agent_id        String
+  sell_offer_id   String
+  store_link      String
+  product_price   BigInt   // Using BigInt for i64
+  agent_fee       BigInt
+  total_paid      BigInt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user       User?      @relation(fields: [buyer], references: [user_owner_address])
+  buyOffer   BuyOffer   @relation(fields: [buy_offer_id], references: [buy_offer_id])
+  sellOffer  SellOffer  @relation(fields: [sell_offer_id], references: [sell_offer_id])
+
+  @@index([buy_offer_id])
+  @@index([buyer])
+  @@index([agent_id])
+  @@index([sell_offer_id])
+  @@map("manual_buys")
+}
+
+model ShopPurchase {
+  id            String   @id @default(cuid())
+  agent_id      String
+  sell_offer_id String
+  store_link    String
+  product_price BigInt   // Using BigInt for i64
+  agent_fee     BigInt
+  platform_fee  BigInt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  sellOffer SellOffer @relation(fields: [sell_offer_id], references: [sell_offer_id])
+
+  @@index([agent_id])
+  @@index([sell_offer_id])
+  @@map("shop_purchases")
+}

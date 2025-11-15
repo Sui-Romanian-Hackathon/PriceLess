@@ -87,7 +87,19 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({
     if (!walletAddress || !account) {
       throw new Error("Wallet not connected.");
     }
- 
+
+    // Fetch user data from backend using the wallet address
+      const getUserResponse = await fetch(
+        `http://localhost:3000/api/get_user?address=${walletAddress}`
+      );
+
+      if (!getUserResponse.ok) {
+        console.warn("Failed to fetch user data from backend:", getUserResponse.statusText);
+      } else {
+        const userData = await getUserResponse.json();
+        console.log("User data fetched from backend:", userData.data);
+      }
+
     try {
       const tx = await createRegisterUserTransaction({
         client: suiClient,

@@ -40,7 +40,7 @@ async function mintRON() {
                 tx.object(targetTreasuryCap!),
                 tx.pure.u64(10000000000_00),   
                 // tx.object(address), 
-                tx.pure.address("0x56af7454baf54f43feeafd96d6ab66f37ced94805e3f7c7fa64fce66c0da6365"),
+                tx.pure.address("0xe84167595a4c2b113329dededb103be1029a7fe258cc725ad1ee637d59801b0a"),
             ],
         });
 

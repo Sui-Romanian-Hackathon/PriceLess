@@ -1,6 +1,6 @@
 # Events Indexer
 
-Sui Indexer for Agent Registration events using the [sui-indexer-alt](https://github.com/MystenLabs/sui/tree/main/crates/sui-indexer-alt) framework.
+Sui Indexer for PriceLess events using the [sui-indexer-alt](https://github.com/MystenLabs/sui/tree/main/crates/sui-indexer-alt) framework.
 
 ## Setup
 

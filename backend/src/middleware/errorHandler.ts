@@ -3,15 +3,15 @@ import { AppError } from "../errors/AppError";
 
 export const errorHandler = (
   err: Error | AppError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   console.error("Error:", {
     message: err.message,
     stack: err.stack,
-    path: req.path,
-    method: req.method,
+    path: _req.path,
+    method: _req.method,
   });
 
   if (err instanceof AppError) {
@@ -42,7 +42,7 @@ export const errorHandler = (
   }
 
   // Default error response
-  res.status(500).json({
+  return res.status(500).json({
     error: "Internal server error",
     code: "INTERNAL_SERVER_ERROR",
     statusCode: 500,

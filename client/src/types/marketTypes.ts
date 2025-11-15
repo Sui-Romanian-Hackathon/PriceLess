@@ -4,15 +4,19 @@ export interface Agent {
   id: string;
   name: string;
   rating: number;
+  address?: string; // Sui wallet address for agent
 }
 
 export interface SellOffer {
   id: string;
+  buy_offer_id: string; // Added to match with BuyOffer
   agent: Agent;
   price: number;
-  shop: string; 
+  shop: string;
   quantity: number;
   productId: string;
+  agent_id: string; // Agent's object ID from blockchain
+  agent_address: string; // Agent's wallet address
 }
 
 export interface BuyOffer {

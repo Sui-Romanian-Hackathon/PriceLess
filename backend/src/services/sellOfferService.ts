@@ -18,7 +18,6 @@ export class SellOfferService {
         include: {
           buyOffer: true,
           manualBuys: true,
-          shopPurchases: true,
         },
       });
       return sellOffer;
@@ -30,13 +29,12 @@ export class SellOfferService {
     }
   }
 
-  static async getSellOfferById(id: string) {
+  static async getSellOfferById(id: number) {
     const sellOffer = await prisma.sellOffer.findUnique({
       where: { id },
       include: {
         buyOffer: true,
         manualBuys: true,
-        shopPurchases: true,
       },
     });
 
@@ -53,7 +51,6 @@ export class SellOfferService {
       include: {
         buyOffer: true,
         manualBuys: true,
-        shopPurchases: true,
       },
     });
 
@@ -73,9 +70,7 @@ export class SellOfferService {
         include: {
           buyOffer: true,
           manualBuys: true,
-          shopPurchases: true,
         },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.sellOffer.count({
         where: { buy_offer_id: buyOfferId },
@@ -94,9 +89,7 @@ export class SellOfferService {
         include: {
           buyOffer: true,
           manualBuys: true,
-          shopPurchases: true,
         },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.sellOffer.count({
         where: { agent_id: agentId },
@@ -114,9 +107,7 @@ export class SellOfferService {
         include: {
           buyOffer: true,
           manualBuys: true,
-          shopPurchases: true,
         },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.sellOffer.count(),
     ]);
@@ -124,7 +115,7 @@ export class SellOfferService {
     return { sellOffers, total };
   }
 
-  static async updateSellOffer(id: string, data: UpdateSellOfferBody) {
+  static async updateSellOffer(id: number, data: UpdateSellOfferBody) {
     try {
       const sellOffer = await prisma.sellOffer.update({
         where: { id },
@@ -136,7 +127,6 @@ export class SellOfferService {
         include: {
           buyOffer: true,
           manualBuys: true,
-          shopPurchases: true,
         },
       });
       return sellOffer;
@@ -148,7 +138,7 @@ export class SellOfferService {
     }
   }
 
-  static async deleteSellOffer(id: string) {
+  static async deleteSellOffer(id: number) {
     try {
       const sellOffer = await prisma.sellOffer.delete({
         where: { id },

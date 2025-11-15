@@ -7,25 +7,18 @@ export class ShopPurchaseService {
     const shopPurchase = await prisma.shopPurchase.create({
       data: {
         agent_id: data.agent_id,
-        sell_offer_id: data.sell_offer_id,
         store_link: data.store_link,
         product_price: data.product_price,
         agent_fee: data.agent_fee,
         platform_fee: data.platform_fee,
       },
-      include: {
-        sellOffer: true,
-      },
     });
     return shopPurchase;
   }
 
-  static async getShopPurchaseById(id: string) {
+  static async getShopPurchaseById(id: number) {
     const shopPurchase = await prisma.shopPurchase.findUnique({
       where: { id },
-      include: {
-        sellOffer: true,
-      },
     });
 
     if (!shopPurchase) {
@@ -41,32 +34,9 @@ export class ShopPurchaseService {
         where: { agent_id: agentId },
         skip,
         take,
-        include: {
-          sellOffer: true,
-        },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.shopPurchase.count({
         where: { agent_id: agentId },
-      }),
-    ]);
-
-    return { shopPurchases, total };
-  }
-
-  static async getShopPurchasesBySellOfferId(sellOfferId: string, skip: number, take: number) {
-    const [shopPurchases, total] = await Promise.all([
-      prisma.shopPurchase.findMany({
-        where: { sell_offer_id: sellOfferId },
-        skip,
-        take,
-        include: {
-          sellOffer: true,
-        },
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.shopPurchase.count({
-        where: { sell_offer_id: sellOfferId },
       }),
     ]);
 
@@ -78,10 +48,6 @@ export class ShopPurchaseService {
       prisma.shopPurchase.findMany({
         skip,
         take,
-        include: {
-          sellOffer: true,
-        },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.shopPurchase.count(),
     ]);
@@ -89,7 +55,7 @@ export class ShopPurchaseService {
     return { shopPurchases, total };
   }
 
-  static async deleteShopPurchase(id: string) {
+  static async deleteShopPurchase(id: number) {
     try {
       const shopPurchase = await prisma.shopPurchase.delete({
         where: { id },

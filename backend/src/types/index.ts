@@ -34,11 +34,12 @@ export type ShopPurchaseResponse = ShopPurchase;
 // Request body types
 export interface CreateUserBody {
   user_id: string;
-  user_object_address: string;
+  user_address: string;
   user_owner_address: string;
   subscription_fee: bigint;
   subscription_deadline: bigint;
-  timestamp: bigint;
+  active: boolean;
+  registered_at: bigint;
 }
 
 export interface UpdateUserBody {

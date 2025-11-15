@@ -8,11 +8,12 @@ export class UserService {
       const user = await prisma.user.create({
         data: {
           user_id: data.user_id,
-          user_object_address: data.user_object_address,
+          user_address: data.user_address,
           user_owner_address: data.user_owner_address,
           subscription_fee: data.subscription_fee,
           subscription_deadline: data.subscription_deadline,
-          timestamp: data.timestamp,
+          active: data.active,
+          registered_at: data.registered_at,
         },
       });
       return user;
@@ -24,7 +25,7 @@ export class UserService {
     }
   }
 
-  static async getUserById(id: string) {
+  static async getUserById(id: number) {
     const user = await prisma.user.findUnique({
       where: { id },
       include: {
@@ -65,7 +66,7 @@ export class UserService {
           buyOffers: true,
           manualBuys: true,
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { registered_at: "desc" },
       }),
       prisma.user.count(),
     ]);
@@ -73,7 +74,7 @@ export class UserService {
     return { users, total };
   }
 
-  static async updateUser(id: string, data: UpdateUserBody) {
+  static async updateUser(id: number, data: UpdateUserBody) {
     try {
       const user = await prisma.user.update({
         where: { id },
@@ -99,7 +100,7 @@ export class UserService {
     }
   }
 
-  static async deleteUser(id: string) {
+  static async deleteUser(id: number) {
     try {
       const user = await prisma.user.delete({
         where: { id },

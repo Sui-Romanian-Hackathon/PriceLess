@@ -1,23 +1,25 @@
 // src/components/ProductCard.tsx
 
-import { ShoppingBag, DollarSign, MapPin, ChevronRight, Calendar, Target } from "lucide-react";
+import { ShoppingBag, DollarSign, MapPin, ChevronRight, Calendar, Target, ShoppingCart } from "lucide-react";
 import type { FC } from "react";
-import type { Product } from '../types'; 
-import type { SellOffer, BuyOffer } from '../types/marketTypes'; 
+import type { Product } from '../types';
+import type { SellOffer, BuyOffer } from '../types/marketTypes';
 
 interface ProductCardProps {
   product: Product;
   sellOffers: SellOffer[];
   buyOffers: BuyOffer[];
-  
+
   onViewDetails: (product: Product) => void;
+  onBuySellOffer: (offer: SellOffer) => void;
 }
 
-const ProductCard: FC<ProductCardProps> = ({ 
+const ProductCard: FC<ProductCardProps> = ({
   product,
   sellOffers,
   buyOffers,
   onViewDetails,
+  onBuySellOffer,
 }) => {
   
   const formatRating = (rating: number) => {
@@ -28,7 +30,7 @@ const ProductCard: FC<ProductCardProps> = ({
     if (offer.type === 'TargetPrice' && offer.targetPrice) {
         return (
             <span className="text-indigo-600 font-bold text-sm flex items-center">
-                <Target size={14} className="mr-1" /> Limit Price: ${offer.targetPrice.toFixed(2)}
+                <Target size={14} className="mr-1" /> Limit Price: RON {offer.targetPrice.toFixed(2)}
             </span>
         );
     }
@@ -61,7 +63,7 @@ const ProductCard: FC<ProductCardProps> = ({
           <DollarSign size={16} className="mr-1" /> Best Price Offer:
         </p>
         <p className="text-3xl font-extrabold text-green-600">
-          ${product.bestPrice.toFixed(2)}
+          RON {product.bestPrice.toFixed(2)}
         </p>
         <p className="text-sm text-gray-600 flex items-center mt-1">
           <MapPin size={14} className="mr-1 text-gray-500" /> Found at: **
@@ -70,28 +72,23 @@ const ProductCard: FC<ProductCardProps> = ({
       </div>
       
       {/* --- Lista Ofertelor de Cumpărare (Buy Offers) --- */}
-      <div className="mb-6 border-b pb-4">
-        <h4 className="text-xl font-bold text-gray-700 mb-3">
-            Your Buy Offers ({buyOffers.length})
-        </h4>
-        {buyOffers.length === 0 ? (
-            <p className="text-gray-500 italic text-sm">You have no active Buy Offers.</p>
-        ) : (
-            <div className="space-y-3">
-                {buyOffers.slice(0, 2).map(offer => ( 
-                    <div 
-                        key={offer.id} 
-                        className="flex items-center justify-between p-2 bg-indigo-100 rounded-lg border border-indigo-300 shadow-sm"
-                    >
-                        <BuyOfferDisplay offer={offer} /> 
-                    </div>
-                ))}
-                {buyOffers.length > 2 && (
-                    <p className="text-xs text-gray-500 mt-1">... and {buyOffers.length - 2} more. View Details to manage.</p>
-                )}
-            </div>
-        )}
-      </div>
+      {buyOffers.length > 0 && (
+        <div className="mb-6 border-b pb-4">
+          <div className="space-y-3">
+              {buyOffers.slice(0, 2).map(offer => (
+                  <div
+                      key={offer.id}
+                      className="flex items-center justify-between p-2 bg-indigo-100 rounded-lg border border-indigo-300 shadow-sm"
+                  >
+                      <BuyOfferDisplay offer={offer} />
+                  </div>
+              ))}
+              {buyOffers.length > 2 && (
+                  <p className="text-xs text-gray-500 mt-1">... and {buyOffers.length - 2} more. View Details to manage.</p>
+              )}
+          </div>
+        </div>
+      )}
 
       {/* --- Lista Ofertelor de Vânzare (Sell Offers) --- */}
       <div className="flex-grow">
@@ -102,23 +99,30 @@ const ProductCard: FC<ProductCardProps> = ({
           {sellOffers.length === 0 ? (
             <p className="text-gray-500 italic text-sm">No current Sell Offers.</p>
           ) : (
-            sellOffers.slice(0, 2).map(offer => ( 
-              <div 
-                key={offer.id} 
-                className="flex items-center justify-between p-2 bg-white border rounded-lg shadow-sm"
+            sellOffers.slice(0, 2).map(offer => (
+              <div
+                key={offer.id}
+                className="flex items-center justify-between p-3 bg-white border rounded-lg shadow-sm hover:bg-gray-50 transition"
               >
                 <div className="flex flex-col flex-1 min-w-0">
-                  <p className="text-xl font-extrabold text-red-600">${offer.price.toFixed(2)}</p>
+                  <p className="text-lg font-extrabold text-red-600">RON {offer.price.toFixed(2)}</p>
                   <p className="text-xs text-gray-500 truncate">
                     Agent: <span className="font-semibold">{offer.agent.name}</span>
                   </p>
                 </div>
 
-                <div className="flex flex-col items-end mx-4 min-w-[100px]">
-                    <p className="text-xs text-yellow-600 font-medium">
-                        {formatRating(offer.agent.rating)}
-                    </p>
+                <div className="flex flex-col items-end mx-2 min-w-[80px]">
+                  <p className="text-xs text-yellow-600 font-medium">
+                    {formatRating(offer.agent.rating)}
+                  </p>
                 </div>
+
+                <button
+                  onClick={() => onBuySellOffer(offer)}
+                  className="ml-2 py-1 px-2 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition font-semibold flex items-center whitespace-nowrap"
+                >
+                  <ShoppingCart size={14} className="mr-1" /> Buy
+                </button>
               </div>
             ))
           )}

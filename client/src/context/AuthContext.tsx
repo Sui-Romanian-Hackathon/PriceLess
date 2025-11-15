@@ -3,6 +3,7 @@ import React, {
   useContext,
   useState,
   useMemo,
+  useEffect,
   type FC,
 } from "react";
 import {
@@ -43,6 +44,7 @@ interface AuthContextTypeExtended extends AuthContextType {
   registerAndSubscribe: (
     subscriptionType: SubscriptionType
   ) => Promise<SuiTransactionBlockResponse>;
+  userId: string | null;
 }
 
 const initialContext: AuthContextTypeExtended = {
@@ -56,6 +58,7 @@ const initialContext: AuthContextTypeExtended = {
   logout: () => {},
   registerAndSubscribe: () =>
     Promise.reject(new Error("Function not initialized")),
+  userId: null,
   mockUserData: { subscriptionStatus: "", offersMade: 0, walletBalance: "" },
   mockAgentData: {
     agentName: "",
@@ -75,11 +78,54 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({
   const suiClient = useSuiClient();
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [hasAccess, setHasAccess] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
 
 
 
   const walletAddress: string | null = account?.address || null;
+
+  // Check if user already exists in DB when wallet connects
+  useEffect(() => {
+    const checkExistingUser = async () => {
+      if (!walletAddress) {
+        setUserId(null);
+        setHasAccess(false);
+        setUserRole(null);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/get_user?address=${walletAddress}`
+        );
+
+        if (response.ok) {
+          const userData = await response.json();
+          if (userData.data) {
+            console.log("Existing user found:", userData.data);
+            setUserId(userData.data.user_id);
+            setHasAccess(true);
+            setUserRole("user"); // Set role based on what's in the database
+            console.log("User automatically authenticated with ID:", userData.data.user_id);
+          }
+        } else {
+          // User doesn't exist, clear the state
+          setUserId(null);
+          setHasAccess(false);
+          setUserRole(null);
+        }
+      } catch (error) {
+        console.error("Error checking existing user:", error);
+        // On error, let user proceed to role selection
+        setUserId(null);
+        setHasAccess(false);
+        setUserRole(null);
+      }
+    };
+
+    checkExistingUser();
+  }, [walletAddress]);
 
   const registerAndSubscribe = async (
     subscriptionType: SubscriptionType
@@ -98,6 +144,10 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({
       } else {
         const userData = await getUserResponse.json();
         console.log("User data fetched from backend:", userData.data);
+        if (userData.data?.user_id) {
+          setUserId(userData.data.user_id);
+          console.log("User ID stored:", userData.data.user_id);
+        }
       }
 
     try {
@@ -158,6 +208,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({
   const logout = () => {
     setUserRole(null);
     setHasAccess(false);
+    setUserId(null);
   };
 
   // Mock Data (Rămâne neschimbată)
@@ -208,6 +259,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({
       simulateAccessGrant,
       logout,
       registerAndSubscribe,
+      userId,
       mockUserData,
       mockAgentData,
     }),
@@ -215,6 +267,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({
       walletAddress,
       userRole,
       hasAccess,
+      userId,
       mockUserData,
       mockAgentData,
       registerAndSubscribe,

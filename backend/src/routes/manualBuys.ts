@@ -3,6 +3,7 @@ import { ManualBuyService } from "../services/manualBuyService";
 import { validateData, manualBuyCreationSchema } from "../utils/validation";
 import { getPaginationParams, calculatePaginationMeta } from "../utils/pagination";
 import { CreateManualBuyBody } from "../types";
+import { serializeBigInt } from "../utils/bigintSerializer";
 
 const router = Router();
 
@@ -12,7 +13,7 @@ router.post("/", async (req: Request, res: Response) => {
   const manualBuy = await ManualBuyService.createManualBuy(data);
   res.status(201).json({
     success: true,
-    data: manualBuy,
+    data: serializeBigInt(manualBuy),
     timestamp: new Date().toISOString(),
   });
 });
@@ -30,7 +31,7 @@ router.get("/", async (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    data: manualBuys,
+    data: serializeBigInt(manualBuys),
     pagination,
     timestamp: new Date().toISOString(),
   });
@@ -38,11 +39,11 @@ router.get("/", async (req: Request, res: Response) => {
 
 // Get manual buy by ID
 router.get("/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10);
   const manualBuy = await ManualBuyService.getManualBuyById(id);
   res.json({
     success: true,
-    data: manualBuy,
+    data: serializeBigInt(manualBuy),
     timestamp: new Date().toISOString(),
   });
 });
@@ -61,7 +62,7 @@ router.get("/buyer/:buyer", async (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    data: manualBuys,
+    data: serializeBigInt(manualBuys),
     pagination,
     timestamp: new Date().toISOString(),
   });
@@ -81,7 +82,7 @@ router.get("/agent/:agentId", async (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    data: manualBuys,
+    data: serializeBigInt(manualBuys),
     pagination,
     timestamp: new Date().toISOString(),
   });
@@ -101,7 +102,7 @@ router.get("/buy-offer/:buyOfferId", async (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    data: manualBuys,
+    data: serializeBigInt(manualBuys),
     pagination,
     timestamp: new Date().toISOString(),
   });
@@ -109,11 +110,11 @@ router.get("/buy-offer/:buyOfferId", async (req: Request, res: Response) => {
 
 // Delete manual buy
 router.delete("/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10);
   const manualBuy = await ManualBuyService.deleteManualBuy(id);
   res.json({
     success: true,
-    data: manualBuy,
+    data: serializeBigInt(manualBuy),
     timestamp: new Date().toISOString(),
   });
 });

@@ -33,7 +33,7 @@ const ProductCardOffersPanel: FC<ProductCardOffersPanelProps> = ({
     if (offer.type === 'TargetPrice' && offer.targetPrice) {
         return (
             <span className="text-indigo-600 font-bold flex items-center">
-                <Target size={14} className="mr-1" /> Limit Price: ${offer.targetPrice.toFixed(2)}
+                <Target size={14} className="mr-1" /> Limit Price: RON {offer.targetPrice.toFixed(2)}
             </span>
         );
     }
@@ -54,14 +54,16 @@ const ProductCardOffersPanel: FC<ProductCardOffersPanelProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-xl border-t-4 border-blue-500 flex flex-col">
-      
-      {/* --- Buton "Create a Buy Offer" --- */}
-      <button
-        onClick={() => onCreateBuyOffer(product)}
-        className="mb-6 w-full py-3 bg-indigo-600 text-white rounded-lg font-bold flex items-center justify-center hover:bg-indigo-700 transition shadow-md text-lg"
-      >
-        <Plus size={20} className="mr-2" /> Create Your Buy Offer
-      </button>
+
+      {/* --- Buton "Create a Buy Offer" (only show if no offers exist) --- */}
+      {buyOffers.length === 0 && (
+        <button
+          onClick={() => onCreateBuyOffer(product)}
+          className="mb-6 w-full py-3 bg-indigo-600 text-white rounded-lg font-bold flex items-center justify-center hover:bg-indigo-700 transition shadow-md text-lg"
+        >
+          <Plus size={20} className="mr-2" /> Create Your Buy Offer
+        </button>
+      )}
 
       {/* --- Lista Ofertelor de Cumpărare (Buy Offers) --- */}
       <div className="mb-6 border-b pb-4">
@@ -73,25 +75,11 @@ const ProductCardOffersPanel: FC<ProductCardOffersPanelProps> = ({
         ) : (
             <div className="space-y-3">
                 {buyOffers.map(offer => (
-                    <div 
-                        key={offer.id} 
-                        className="flex items-center justify-between p-3 bg-indigo-100 rounded-lg border border-indigo-300 shadow-sm"
+                    <div
+                        key={offer.id}
+                        className="flex items-center p-3 bg-indigo-100 rounded-lg border border-indigo-300 shadow-sm"
                     >
                         <BuyOfferDisplay offer={offer} />
-                        <div className="flex space-x-2">
-                            <button 
-                                onClick={() => onUpdateBuyOffer(offer)}
-                                className="text-xs px-2 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition"
-                            >
-                                Edit
-                            </button>
-                            <button 
-                                onClick={() => onDeleteBuyOffer(offer)}
-                                className="text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                            >
-                                Delete
-                            </button>
-                        </div>
                     </div>
                 ))}
             </div>
@@ -122,7 +110,7 @@ const ProductCardOffersPanel: FC<ProductCardOffersPanelProps> = ({
                 >
                   {/* Detalii Ofertă */}
                   <div className="flex flex-col flex-1 min-w-0">
-                    <p className="text-2xl font-extrabold text-red-600">${offer.price.toFixed(2)}</p>
+                    <p className="text-2xl font-extrabold text-red-600">RON {offer.price.toFixed(2)}</p>
                     <p className="text-xs text-gray-500 truncate">
                       at: <span className="font-semibold">{offer.shop}</span>
                     </p>

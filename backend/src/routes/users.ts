@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { UserService } from "../services/userService";
 import { ValidationError } from "../errors/AppError";
+import { serializeBigInt } from "../utils/bigintSerializer";
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.get("/", async (req: Request, res: Response) => {
   const user = await UserService.getUserByOwnerAddress(address);
   res.json({
     success: true,
-    data: user,
+    data: serializeBigInt(user),
     timestamp: new Date().toISOString(),
   });
 });

@@ -68,7 +68,7 @@ const ProductDetailView: FC<ProductDetailViewProps> = ({
                 <DollarSign size={24} className="mr-2 text-green-600" /> Best Price Offer
               </h2>
               <p className="text-5xl font-extrabold text-green-600 mb-3 leading-tight">
-                ${product.bestPrice.toFixed(2)}
+                RON {product.bestPrice.toFixed(2)}
               </p>
               <p className="text-md text-gray-600 flex items-center">
                 <MapPin size={16} className="mr-2 text-red-400" /> Found at: **{product.bestShop}**

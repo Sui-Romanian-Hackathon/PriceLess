@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@mysten/sui": "^1.44.0",
+    "axios": "^1.13.2",
     "dotenv": "^16.6.1"
   },
   "devDependencies": {

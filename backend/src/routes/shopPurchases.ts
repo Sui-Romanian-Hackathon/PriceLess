@@ -38,7 +38,7 @@ router.get("/", async (req: Request, res: Response) => {
 
 // Get shop purchase by ID
 router.get("/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10);
   const shopPurchase = await ShopPurchaseService.getShopPurchaseById(id);
   res.json({
     success: true,
@@ -67,29 +67,9 @@ router.get("/agent/:agentId", async (req: Request, res: Response) => {
   });
 });
 
-// Get shop purchases by sell offer ID
-router.get("/sell-offer/:sellOfferId", async (req: Request, res: Response) => {
-  const { sellOfferId } = req.params;
-  const { page, limit } = req.query as { page?: string; limit?: string };
-  const { skip, take } = getPaginationParams({
-    page: page ? parseInt(page) : undefined,
-    limit: limit ? parseInt(limit) : undefined,
-  });
-
-  const { shopPurchases, total } = await ShopPurchaseService.getShopPurchasesBySellOfferId(sellOfferId, skip, take);
-  const pagination = calculatePaginationMeta(total, Math.floor(skip / take) + 1, take);
-
-  res.json({
-    success: true,
-    data: shopPurchases,
-    pagination,
-    timestamp: new Date().toISOString(),
-  });
-});
-
 // Delete shop purchase
 router.delete("/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10);
   const shopPurchase = await ShopPurchaseService.deleteShopPurchase(id);
   res.json({
     success: true,

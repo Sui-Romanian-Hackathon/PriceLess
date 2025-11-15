@@ -109,7 +109,7 @@ const CreateBuyOfferModal: FC<CreateBuyOfferModalProps> = ({ isOpen, onClose, pr
         {/* Product Info */}
         <div className="p-6 bg-gray-50 border-b">
             <p className="text-lg font-semibold text-gray-800">Product: **{product.name}**</p>
-            <p className="text-sm text-gray-500">Current Best Price: ${product.bestPrice.toFixed(2)}</p>
+            <p className="text-sm text-gray-500">Current Best Price: RON {product.bestPrice.toFixed(2)}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -168,7 +168,7 @@ const CreateBuyOfferModal: FC<CreateBuyOfferModalProps> = ({ isOpen, onClose, pr
                 value={targetPrice}
                 onChange={(e) => setTargetPrice(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder={`e.g., ${product.bestPrice * 0.95}`}
+                placeholder={`e.g., ${(product.bestPrice * 0.95).toFixed(2)}`}
                 required
               />
             </div>

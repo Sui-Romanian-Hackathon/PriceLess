@@ -24,7 +24,7 @@ export class ManualBuyService {
     return manualBuy;
   }
 
-  static async getManualBuyById(id: string) {
+  static async getManualBuyById(id: number) {
     const manualBuy = await prisma.manualBuy.findUnique({
       where: { id },
       include: {
@@ -52,7 +52,6 @@ export class ManualBuyService {
           buyOffer: true,
           sellOffer: true,
         },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.manualBuy.count({
         where: { buyer },
@@ -73,7 +72,6 @@ export class ManualBuyService {
           buyOffer: true,
           sellOffer: true,
         },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.manualBuy.count({
         where: { agent_id: agentId },
@@ -94,7 +92,6 @@ export class ManualBuyService {
           buyOffer: true,
           sellOffer: true,
         },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.manualBuy.count({
         where: { buy_offer_id: buyOfferId },
@@ -114,7 +111,6 @@ export class ManualBuyService {
           buyOffer: true,
           sellOffer: true,
         },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.manualBuy.count(),
     ]);
@@ -122,7 +118,7 @@ export class ManualBuyService {
     return { manualBuys, total };
   }
 
-  static async deleteManualBuy(id: string) {
+  static async deleteManualBuy(id: number) {
     try {
       const manualBuy = await prisma.manualBuy.delete({
         where: { id },

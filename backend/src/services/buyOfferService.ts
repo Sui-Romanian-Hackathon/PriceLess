@@ -29,7 +29,7 @@ export class BuyOfferService {
     }
   }
 
-  static async getBuyOfferById(id: string) {
+  static async getBuyOfferById(id: number) {
     const buyOffer = await prisma.buyOffer.findUnique({
       where: { id },
       include: {
@@ -73,7 +73,6 @@ export class BuyOfferService {
           user: true,
           sellOffers: true,
         },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.buyOffer.count({
         where: { owner: ownerAddress },
@@ -92,7 +91,6 @@ export class BuyOfferService {
           user: true,
           sellOffers: true,
         },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.buyOffer.count(),
     ]);
@@ -120,7 +118,7 @@ export class BuyOfferService {
     return { buyOffers, total };
   }
 
-  static async updateBuyOffer(id: string, data: UpdateBuyOfferBody) {
+  static async updateBuyOffer(id: number, data: UpdateBuyOfferBody) {
     try {
       const buyOffer = await prisma.buyOffer.update({
         where: { id },
@@ -143,7 +141,7 @@ export class BuyOfferService {
     }
   }
 
-  static async deleteBuyOffer(id: string) {
+  static async deleteBuyOffer(id: number) {
     try {
       const buyOffer = await prisma.buyOffer.delete({
         where: { id },

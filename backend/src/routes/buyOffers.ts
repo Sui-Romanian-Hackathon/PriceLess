@@ -3,6 +3,7 @@ import { BuyOfferService } from "../services/buyOfferService";
 import { validateData, buyOfferCreationSchema } from "../utils/validation";
 import { getPaginationParams, calculatePaginationMeta } from "../utils/pagination";
 import { CreateBuyOfferBody, UpdateBuyOfferBody } from "../types";
+import { serializeBigInt } from "../utils/bigintSerializer";
 
 const router = Router();
 
@@ -12,7 +13,7 @@ router.post("/", async (req: Request, res: Response) => {
   const buyOffer = await BuyOfferService.createBuyOffer(data);
   res.status(201).json({
     success: true,
-    data: buyOffer,
+    data: serializeBigInt(buyOffer),
     timestamp: new Date().toISOString(),
   });
 });
@@ -30,7 +31,7 @@ router.get("/", async (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    data: buyOffers,
+    data: serializeBigInt(buyOffers),
     pagination,
     timestamp: new Date().toISOString(),
   });
@@ -38,11 +39,11 @@ router.get("/", async (req: Request, res: Response) => {
 
 // Get buy offer by ID
 router.get("/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10);
   const buyOffer = await BuyOfferService.getBuyOfferById(id);
   res.json({
     success: true,
-    data: buyOffer,
+    data: serializeBigInt(buyOffer),
     timestamp: new Date().toISOString(),
   });
 });
@@ -53,7 +54,7 @@ router.get("/blockchain/:buyOfferId", async (req: Request, res: Response) => {
   const buyOffer = await BuyOfferService.getBuyOfferByBlockchainId(buyOfferId);
   res.json({
     success: true,
-    data: buyOffer,
+    data: serializeBigInt(buyOffer),
     timestamp: new Date().toISOString(),
   });
 });
@@ -72,7 +73,7 @@ router.get("/owner/:ownerAddress", async (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    data: buyOffers,
+    data: serializeBigInt(buyOffers),
     pagination,
     timestamp: new Date().toISOString(),
   });
@@ -92,7 +93,7 @@ router.get("/active/deadline", async (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    data: buyOffers,
+    data: serializeBigInt(buyOffers),
     pagination,
     timestamp: new Date().toISOString(),
   });
@@ -100,23 +101,23 @@ router.get("/active/deadline", async (req: Request, res: Response) => {
 
 // Update buy offer
 router.patch("/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10);
   const data = req.body as UpdateBuyOfferBody;
   const buyOffer = await BuyOfferService.updateBuyOffer(id, data);
   res.json({
     success: true,
-    data: buyOffer,
+    data: serializeBigInt(buyOffer),
     timestamp: new Date().toISOString(),
   });
 });
 
 // Delete buy offer
 router.delete("/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10);
   const buyOffer = await BuyOfferService.deleteBuyOffer(id);
   res.json({
     success: true,
-    data: buyOffer,
+    data: serializeBigInt(buyOffer),
     timestamp: new Date().toISOString(),
   });
 });

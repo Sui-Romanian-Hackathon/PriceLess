@@ -3,6 +3,7 @@ import { SellOfferService } from "../services/sellOfferService";
 import { validateData, sellOfferCreationSchema } from "../utils/validation";
 import { getPaginationParams, calculatePaginationMeta } from "../utils/pagination";
 import { CreateSellOfferBody, UpdateSellOfferBody } from "../types";
+import { serializeBigInt } from "../utils/bigintSerializer";
 
 const router = Router();
 
@@ -12,7 +13,7 @@ router.post("/", async (req: Request, res: Response) => {
   const sellOffer = await SellOfferService.createSellOffer(data);
   res.status(201).json({
     success: true,
-    data: sellOffer,
+    data: serializeBigInt(sellOffer),
     timestamp: new Date().toISOString(),
   });
 });
@@ -30,7 +31,7 @@ router.get("/", async (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    data: sellOffers,
+    data: serializeBigInt(sellOffers),
     pagination,
     timestamp: new Date().toISOString(),
   });
@@ -38,11 +39,11 @@ router.get("/", async (req: Request, res: Response) => {
 
 // Get sell offer by ID
 router.get("/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10);
   const sellOffer = await SellOfferService.getSellOfferById(id);
   res.json({
     success: true,
-    data: sellOffer,
+    data: serializeBigInt(sellOffer),
     timestamp: new Date().toISOString(),
   });
 });
@@ -53,7 +54,7 @@ router.get("/blockchain/:sellOfferId", async (req: Request, res: Response) => {
   const sellOffer = await SellOfferService.getSellOfferByBlockchainId(sellOfferId);
   res.json({
     success: true,
-    data: sellOffer,
+    data: serializeBigInt(sellOffer),
     timestamp: new Date().toISOString(),
   });
 });
@@ -72,7 +73,7 @@ router.get("/buy-offer/:buyOfferId", async (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    data: sellOffers,
+    data: serializeBigInt(sellOffers),
     pagination,
     timestamp: new Date().toISOString(),
   });
@@ -92,7 +93,7 @@ router.get("/agent/:agentId", async (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    data: sellOffers,
+    data: serializeBigInt(sellOffers),
     pagination,
     timestamp: new Date().toISOString(),
   });
@@ -100,23 +101,23 @@ router.get("/agent/:agentId", async (req: Request, res: Response) => {
 
 // Update sell offer
 router.patch("/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10);
   const data = req.body as UpdateSellOfferBody;
   const sellOffer = await SellOfferService.updateSellOffer(id, data);
   res.json({
     success: true,
-    data: sellOffer,
+    data: serializeBigInt(sellOffer),
     timestamp: new Date().toISOString(),
   });
 });
 
 // Delete sell offer
 router.delete("/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10);
   const sellOffer = await SellOfferService.deleteSellOffer(id);
   res.json({
     success: true,
-    data: sellOffer,
+    data: serializeBigInt(sellOffer),
     timestamp: new Date().toISOString(),
   });
 });

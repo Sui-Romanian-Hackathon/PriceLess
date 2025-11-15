@@ -109,16 +109,19 @@ export async function createBuyOfferTransaction(params: BuyOfferTxParams): Promi
     console.log('offer type object', offerTypeObject);
 
     // --- 5. Call create_buy_offer ---
-    
-    const deadlineArg = offerType === 'Deadline' && deadlineTimestampMs !== null
-        ? tx.pure.u64(deadlineTimestampMs)
-        : tx.pure.u64(0); 
+
+    // Convert deadline from milliseconds to seconds (Sui uses seconds)
+    const deadlineSeconds = offerType === 'Deadline' && deadlineTimestampMs !== null
+        ? Math.floor(deadlineTimestampMs / 1000)
+        : 0;
+
+    const deadlineArg = tx.pure.u64(BigInt(deadlineSeconds));
 
     tx.moveCall({
         target: `${PRICELESS_PACKAGE}::core_logic::create_buy_offer`,
         arguments: [
             tx.object(PLATFORM_REGISTRY),
-            tx.object(USER_ADDR), 
+            tx.object(USER_ADDR),
             tx.pure.string(productName),
             priceBalance,
             offerTypeObject,

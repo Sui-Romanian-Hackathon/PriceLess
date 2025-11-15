@@ -2,7 +2,7 @@ import { useState, useMemo, type FC } from "react";
 import { List, CornerUpLeft, User, LogOut } from "lucide-react";
 import { mockProducts } from "../mocks/mockProducts";
 import { useAuth } from "../context/AuthContext";
-import { useUserMarket } from "../context/UserMArketContext"; 
+import { useUserMarket } from "../context/UserMarketContext"; 
 import type { Product } from "../types"; 
 import ProductCard from "../components/ProductCard";
 import ProductDetailView from "../components/ProductViewDetail";

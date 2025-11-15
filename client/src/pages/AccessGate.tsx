@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { User, Briefcase, Zap, Shield } from "lucide-react";
-import type { FC } from "react";
+import React, { type FC, useState } from "react"; 
 import { useAuth } from "../context/AuthContext";
 import type { UserRole } from "../types";
 
@@ -11,8 +11,11 @@ const AccessGate: FC = () => {
     setUserRole,
     hasAccess,
     walletAddress,
-    simulateAccessGrant,
+    simulateAccessGrant, 
+    registerAndSubscribe, 
   } = useAuth();
+  
+  const [isLoading, setIsLoading] = useState(false); 
 
   if (!isWalletConnected) {
     return <Navigate to="/" replace />;
@@ -21,6 +24,22 @@ const AccessGate: FC = () => {
   if (hasAccess) {
     return <Navigate to="/profile" replace />;
   }
+
+  const handleSubscription = async (type: "Monthly" | "Yearly") => {
+      if (isLoading) return;
+      setIsLoading(true);
+
+      try {
+          const result = await registerAndSubscribe(type); 
+          console.log('result', result);
+          alert(`Subscripție de succes! Tranzacție ID: ${result.digest}`);
+      } catch (error) {
+          console.error("Subscription failed:", error);
+          alert(`Eroare la subscriere: ${error instanceof Error ? error.message : String(error)}`);
+      } finally {
+          setIsLoading(false);
+      }
+  };
 
   // --- Section 1: Role Selection ---
   if (!userRole) {
@@ -90,13 +109,16 @@ const AccessGate: FC = () => {
               Monthly Subscription
             </h2>
             <p className="text-4xl font-extrabold text-gray-800 mb-4">
-              5 SUI / month
-            </p>
+              10 RON / month
+            </p> 
             <button
-              onClick={() => simulateAccessGrant("user")}
-              className="w-full py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition"
+              onClick={() => handleSubscription("Monthly")}
+              disabled={isLoading}
+              className={`w-full py-3 text-white rounded-lg font-bold transition ${
+                  isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
-              Pay 5 SUI
+              {isLoading ? 'Processing...' : 'Pay 10 RON'}
             </button>
           </div>
 
@@ -110,18 +132,22 @@ const AccessGate: FC = () => {
               Annual Subscription
             </h2>
             <p className="text-4xl font-extrabold text-gray-800 mb-4">
-              50 SUI / year
-            </p>
+              100 RON / year
+            </p> 
             <button
-              onClick={() => simulateAccessGrant("user")}
-              className="w-full py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition"
+              onClick={() => handleSubscription("Yearly")}
+              disabled={isLoading}
+              className={`w-full py-3 text-white rounded-lg font-bold transition ${
+                isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
-              Pay 50 SUI
+              {isLoading ? 'Processing...' : 'Pay 100 RON'}
             </button>
           </div>
         </div>
         <button
           onClick={() => setUserRole(null)}
+          disabled={isLoading}
           className="mt-8 text-sm text-gray-500 hover:text-gray-700"
         >
           &larr; Back to Role Selection
@@ -130,7 +156,7 @@ const AccessGate: FC = () => {
     );
   }
 
-  // --- Section 3: Conditional Access (Agent: Staking) ---
+  // --- Section 3: Conditional Access (Agent: Staking - MOCK) ---
   if (userRole === "agent") {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
@@ -149,10 +175,10 @@ const AccessGate: FC = () => {
             <p className="text-3xl font-extrabold text-green-600">100 SUI</p>
           </div>
           <button
-            onClick={() => simulateAccessGrant("agent")}
+            onClick={() => simulateAccessGrant("agent")} // Mock Call
             className="w-full py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition"
           >
-            Stake 100 SUI
+            Stake 100 SUI (Mock)
           </button>
           <p className="text-xs text-gray-500 mt-4 text-center">
             This amount remains locked as long as you are an Agent.

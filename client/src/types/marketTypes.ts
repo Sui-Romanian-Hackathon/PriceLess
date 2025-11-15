@@ -23,6 +23,16 @@ export interface BuyOffer {
   productId: string;
 }
 
+// 🚨 NOU: Definiția și exportul BuyOfferSubmitData
+export interface BuyOfferSubmitData {
+    productId: string;
+    type: 'TargetPrice' | 'Deadline';
+    targetPrice: number | null;
+    deadline: string | null;
+}
+// ----------------------------------------------------
+
+
 export interface ProductCardProps {
   product: Product;
   sellOffers: SellOffer[];

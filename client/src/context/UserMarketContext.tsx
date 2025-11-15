@@ -1,126 +1,159 @@
-// src/context/UserMarketContext.tsx
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  type FC,
+  type ReactNode,
+} from "react";
+import { 
+    useSuiClient, 
+    useCurrentAccount, 
+    useSignAndExecuteTransaction 
+} from "@mysten/dapp-kit";
+import type { BuyOfferSubmitData, BuyOffer, SellOffer } from "../types/marketTypes";
+import { MOCK_BUY_OFFERS } from "../mocks/marketMockData";
+// Nu mai avem nevoie de useAuth pentru hasMockRonCoins
+// import { useAuth } from "./AuthContext"; // Importul nu mai este necesar dacă nu este folosit altundeva
 
-import React, { createContext, useContext, useState, useMemo, type ReactNode, type FC } from 'react';
-import type { BuyOffer, SellOffer } from '../types/marketTypes'; 
-// 🚨 LINIA CRITICĂ: Verifică acest import și calea!
-import { MOCK_BUY_OFFERS } from '../mocks/marketMockData'; 
+// --- Sui/Transaction Imports (PLACEHOLDERS) ---
+import { createBuyOfferTransaction } from '../services/transactions/buyOfferTx';
+import { extractBuyOfferId } from '../utils/suiUtils'; 
+import type { SuiTransactionBlockResponse } from "@mysten/sui/client";
 
-// Adaugă logul de test la început pentru a confirma că modulul se încarcă
-console.log("LOG TEST: Am ajuns la inceputul contextului!"); 
+// --- Configuration Constants (Utilizați import.meta.env pentru Vite) ---
+const CONFIG = {
+    PRICELESS_PACKAGE: import.meta.env.VITE_PRICELESS_PACKAGE_ID || '0x...',
+    PLATFORM_REGISTRY: import.meta.env.VITE_PLATFORM_REGISTRY_ID || '0x...',
+    RON_PACKAGE_ID: import.meta.env.VITE_RON_PACKAGE_ID || '0x...',
+    USER_OBJECT_ID: import.meta.env.VITE_USER_OBJECT_ID || '0xUSER_OBJECT_ID' 
+};
+// ----------------------------------------------------------------------
 
-// Definim tipul de date trimis de modal
-interface BuyOfferSubmitData {
-    productId: string;
-    type: 'TargetPrice' | 'Deadline';
-    targetPrice: number | null;
-    deadline: string | null;
-}
+// Funcție utilitară locală pentru ID-uri temporare
+const generateUniqueId = (): string => `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-// Interfața Contextului
 interface UserMarketContextType {
-    userBuyOffers: BuyOffer[];
-    
-    createBuyOffer: (data: BuyOfferSubmitData) => Promise<void>;
-    deleteBuyOffer: (offerId: string) => Promise<void>;
-    updateBuyOffer: (offerId: string, data: BuyOfferSubmitData) => Promise<void>;
-    
-    getBuyOffersByProductId: (productId: string) => BuyOffer[]; 
+  userBuyOffers: BuyOffer[];
+  createBuyOffer: (data: BuyOfferSubmitData) => Promise<any>;
+  updateBuyOffer: (offerId: string, data: BuyOfferSubmitData) => Promise<void>;
+  deleteBuyOffer: (offerId: string) => Promise<void>;
 }
 
-// Valoarea default
-const defaultContextValue: UserMarketContextType = {
-    userBuyOffers: [],
-    createBuyOffer: async () => {},
-    deleteBuyOffer: async () => {},
-    updateBuyOffer: async () => {},
-    getBuyOffersByProductId: () => [],
+const initialContext: UserMarketContextType = {
+  userBuyOffers: MOCK_BUY_OFFERS,
+  createBuyOffer: () => Promise.resolve(),
+  updateBuyOffer: () => Promise.resolve(),
+  deleteBuyOffer: () => Promise.resolve(),
 };
 
-export const UserMarketContext = createContext<UserMarketContextType>(defaultContextValue);
-
-const generateUniqueId = () => `b_user_${Date.now()}_${Math.random().toFixed(4).replace('0.', '')}`;
+const UserMarketContext = createContext<UserMarketContextType>(initialContext);
 
 export const UserMarketProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    
-    // 🎯 LOGURI DE DIAGNOSTICARE FINALE (imediate)
-    console.log("DIAGNOSTIC MOCK: Tipul MOCK_BUY_OFFERS:", typeof MOCK_BUY_OFFERS);
-    console.log("DIAGNOSTIC MOCK: Lungimea MOCK_BUY_OFFERS:", Array.isArray(MOCK_BUY_OFFERS) ? MOCK_BUY_OFFERS.length : 'NOT ARRAY');
-    
-    // Inițializăm starea cu datele mock. Dacă MOCK_BUY_OFFERS este undefined, folosește un array gol.
-    const [userBuyOffers, setUserBuyOffers] = useState<BuyOffer[]>(MOCK_BUY_OFFERS || []);
+  const [userBuyOffers, setUserBuyOffers] = useState<BuyOffer[]>(MOCK_BUY_OFFERS);
+  
+  // Sui Hooks
+  const suiClient = useSuiClient();
+  const account = useCurrentAccount();
+  const currentAddress = account?.address || null;
+  
+  const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
 
-    // Simulează latența rețelei Sui
-    const mockSuiTransaction = () => new Promise<void>(resolve => setTimeout(resolve, 500)); 
-
-    const createBuyOffer = async (data: BuyOfferSubmitData) => {
-        await mockSuiTransaction(); 
-        const newOffer: BuyOffer = {
-            id: generateUniqueId(),
-            type: data.type,
-            targetPrice: data.targetPrice,
-            deadline: data.deadline,
-            productId: data.productId,
-        };
-
-        setUserBuyOffers(prevOffers => {
-            const newOffers = [...prevOffers, newOffer];
-            console.log("CONTEXT: Buy Offer Created. New count:", newOffers.length);
-            return newOffers;
-        });
-    };
-
-    const deleteBuyOffer = async (offerId: string) => {
-        await mockSuiTransaction(); 
-        
-        setUserBuyOffers(prevOffers => {
-            const newOffers = prevOffers.filter(offer => offer.id !== offerId);
-            console.log(`CONTEXT: Offer ${offerId} Deleted. New count:`, newOffers.length);
-            return newOffers;
-        });
-    };
-
-    const updateBuyOffer = async (offerId: string, data: BuyOfferSubmitData) => {
-        await mockSuiTransaction(); 
-
-        const updatedOffer: BuyOffer = {
-            id: offerId, 
-            type: data.type,
-            targetPrice: data.targetPrice,
-            deadline: data.deadline,
-            productId: data.productId,
-        };
-
-        setUserBuyOffers(prevOffers => 
-            prevOffers.map(offer => 
-                offer.id === offerId ? updatedOffer : offer
-            )
-        );
-        console.log("CONTEXT: Offer updated.");
-    };
-
-    const getBuyOffersByProductId = (productId: string): BuyOffer[] => {
-        return userBuyOffers.filter(offer => offer.productId === productId);
-    };
-
-    const contextValue = useMemo(() => ({
-        userBuyOffers, 
-        createBuyOffer,
-        deleteBuyOffer,
-        updateBuyOffer,
-        getBuyOffersByProductId,
-    }), [userBuyOffers]); 
-
-    return (
-        <UserMarketContext.Provider value={contextValue}>
-            {children}
-        </UserMarketContext.Provider>
-    );
-};
-
-export const useUserMarket = () => {
-    const context = useContext(UserMarketContext);
-    if (context === undefined) {
-        throw new Error('useUserMarket must be used within a UserMarketProvider');
+  // --- Core Function: CREATE BUY OFFER (SUI INTEGRATION) ---
+  const createBuyOffer = async (data: BuyOfferSubmitData) => {
+    if (!currentAddress || !account) {
+        throw new Error("Wallet not connected or account not found.");
     }
-    return context;
+    
+    const priceRaw = data.targetPrice !== null ? data.targetPrice * 100 : 0; 
+    const deadlineMs = data.deadline ? new Date(data.deadline).getTime() : null;
+
+    // 2. Build the Transaction
+    const tx = await createBuyOfferTransaction({
+        client: suiClient,
+        currentAddress: currentAddress,
+        productName: data.productId, 
+        price: priceRaw, 
+        offerType: data.type,
+        deadlineTimestampMs: deadlineMs,
+        ...CONFIG,
+        USER_ADDR: CONFIG.USER_OBJECT_ID,
+    });
+
+    // 3. Execute Transaction
+    console.log("Submitting Buy Offer transaction for user signature...");
+    
+    const suiResult = await signAndExecute({
+        transaction: tx,
+        options: { 
+            showEvents: true, 
+            showObjectChanges: true, 
+            showEffects: true 
+        },
+    } as any) as unknown as SuiTransactionBlockResponse; 
+
+    // 4. Process Result
+    if (suiResult.effects?.status.status !== 'success') {
+        throw new Error(`Transaction failed: ${suiResult.effects?.status.error}`);
+    }
+    
+    const newOfferObjectId = extractBuyOfferId(suiResult); 
+
+    if (!newOfferObjectId) {
+         console.warn("Could not find new BuyOffer Object ID. The transaction succeeded, but the local state might use a temporary ID.");
+    }
+    
+    // 5. Update Local State
+    const newOffer: BuyOffer = {
+        id: newOfferObjectId || generateUniqueId(),
+        type: data.type,
+        targetPrice: data.targetPrice,
+        deadline: data.deadline,
+        productId: data.productId,
+    };
+
+    setUserBuyOffers(prevOffers => {
+        const newOffers = [...prevOffers, newOffer];
+        return newOffers;
+    });
+
+    return suiResult;
+  };
+  
+  // --- Core Function: UPDATE BUY OFFER (MOCK) ---
+  const updateBuyOffer = async (offerId: string, data: BuyOfferSubmitData) => {
+    await new Promise(resolve => setTimeout(resolve, 500)); 
+
+    setUserBuyOffers(prevOffers => {
+        return prevOffers.map(offer => 
+            offer.id === offerId ? { ...offer, ...data } : offer
+        );
+    });
+  };
+
+  // --- Core Function: DELETE BUY OFFER (MOCK) ---
+  const deleteBuyOffer = async (offerId: string) => {
+    await new Promise(resolve => setTimeout(resolve, 500)); 
+    
+    setUserBuyOffers(prevOffers => prevOffers.filter(offer => offer.id !== offerId));
+  };
+
+
+  const contextValue: UserMarketContextType = useMemo(
+    () => ({
+      userBuyOffers,
+      createBuyOffer,
+      updateBuyOffer,
+      deleteBuyOffer,
+    }),
+    [userBuyOffers, createBuyOffer, updateBuyOffer, deleteBuyOffer]
+  );
+
+  return (
+    <UserMarketContext.Provider value={contextValue}>
+      {children}
+    </UserMarketContext.Provider>
+  );
 };
+
+export const useUserMarket = () => useContext(UserMarketContext);

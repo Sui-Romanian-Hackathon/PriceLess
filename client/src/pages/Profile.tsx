@@ -37,6 +37,7 @@ const Profile: FC = () => {
     walletAddress,
     mockUserData,
     mockAgentData,
+    // Eliminăm: mintMockRonCoins, hasMockRonCoins
   } = useAuth();
 
   if (!isWalletConnected || !hasAccess) {

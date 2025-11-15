@@ -2,7 +2,7 @@ module priceless::mock_shop_buy {
 
     use sui::table::{Self, Table};
     use std::string::{String};
-    use sui::balance::Balance;
+    use sui::balance::{Self, Balance};
 
     use ron::ron::RON;    
     use priceless::agent::{
@@ -12,6 +12,9 @@ module priceless::mock_shop_buy {
     use priceless::platform_registry::{
         PlatformRegistry,
         increase_platform_treasury
+    };
+    use priceless::events::{
+        emit_shop_purchase,
     };
     
     public struct Shop has key{
@@ -38,8 +41,21 @@ module priceless::mock_shop_buy {
         price: Balance<RON>,
         shop: &mut Shop,
     ) {
+        let agent_id = object::id(agent);
+        let agent_fee_value = balance::value(&agent_fee);
+        let platform_fee_value = balance::value(&platform_fee);
+        let product_price = balance::value(&price);
+
+        emit_shop_purchase(
+            agent_id,
+            store_link,
+            product_price,
+            agent_fee_value,
+            platform_fee_value,
+        );
+
         increase_collected_fees(agent, agent_fee);
-        increase_platform_treasury(platform_registry,platform_fee);
+        increase_platform_treasury(platform_registry, platform_fee);
         shop.buy_action.add(store_link, price);
     }
 }

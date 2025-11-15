@@ -85,6 +85,12 @@ module priceless::buy_offer {
         &mut buy_offer.sell_offers
     }
 
+    public(package) fun get_sell_offer_id(buy_offer: &BuyOffer, agent_id: ID): ID {
+        let sell_offers = &buy_offer.sell_offers;
+        let sell_offer = table::borrow(sell_offers, agent_id);
+        object::id(sell_offer)
+    }
+
     public(package) fun get_sell_offers_owner_ids(buy_offer: &BuyOffer): &vector<ID> {
         &buy_offer.sell_offers_owner_ids
     }

@@ -24,6 +24,7 @@ module priceless::core_logic {
         get_price,
         get_store_link,
         get_owner,
+        get_sell_offer_id
     };
     use priceless::sell_offer::{
         drop_offers_data,
@@ -188,21 +189,24 @@ module priceless::core_logic {
         let agent_id = object::id(agent);
         let mut buy_offer = remove_buy_offer_from_platform_registry(platform_registry, buy_offer_id);
         let exists_offer = get_sell_offers_owner_ids(&buy_offer).contains(&agent_id);
-        match (exists_offer) {
+        let sell_offer_id = match (exists_offer) {
             true => {
-                let sell_offer = table::borrow_mut(get_sell_offers_table_mut(&mut buy_offer), agent_id);
+                let  sell_offer = table::borrow_mut(get_sell_offers_table_mut(&mut buy_offer), agent_id);
                 update_sell_offer(sell_offer, store_link, price);
+                get_sell_offer_id(&buy_offer, agent_id)
             },
             false => {
                 let new_sell_offer = new_sell_offer(agent_id, store_link, price, clock, ctx);
                 let sell_offer_id = object::id(&new_sell_offer);
                 table::add(get_sell_offers_table_mut(&mut buy_offer), sell_offer_id, new_sell_offer);
                 vector::push_back(get_sell_offers_owner_ids_mut(&mut buy_offer), sell_offer_id);
+                sell_offer_id
             }
         };
 
         emit_sell_offer_made(
             buy_offer_id,
+            sell_offer_id,
             agent_id,
             caller,
             store_link,

@@ -50,6 +50,7 @@ module priceless::events {
 
     public struct SellOfferMade has copy, drop {
         buy_offer_id: ID,
+        sell_offer_id: ID,
         agent_id: ID,
         agent_address: address,
         store_link: std::string::String,
@@ -95,6 +96,14 @@ module priceless::events {
         buy_offer_id: ID,
         owner: address,
         remaining_balance: u64,
+    }
+
+    public struct ShopPurchase has copy, drop {
+        agent_id: ID,
+        store_link: std::string::String,
+        product_price: u64,
+        agent_fee: u64,
+        platform_fee: u64,
     }
     
     public(package) fun emit_agent_registered(
@@ -191,6 +200,7 @@ module priceless::events {
 
     public(package) fun emit_sell_offer_made(
         buy_offer_id: ID,
+        sell_offer_id: ID,
         agent_id: ID,
         agent_address: address,
         store_link: std::string::String,
@@ -199,6 +209,7 @@ module priceless::events {
     ) {
         event::emit(SellOfferMade {
             buy_offer_id,
+            sell_offer_id,
             agent_id,
             agent_address,
             store_link,
@@ -284,6 +295,22 @@ module priceless::events {
             buy_offer_id,
             owner,
             remaining_balance,
+        });
+    }
+
+    public(package) fun emit_shop_purchase(
+        agent_id: ID,
+        store_link: std::string::String,
+        product_price: u64,
+        agent_fee: u64,
+        platform_fee: u64,
+    ) {
+        event::emit(ShopPurchase {
+            agent_id,
+            store_link,
+            product_price,
+            agent_fee,
+            platform_fee,
         });
     }
 }

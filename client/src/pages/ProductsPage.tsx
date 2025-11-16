@@ -14,6 +14,9 @@ import ProductDetailView from "../components/ProductViewDetail";
 import CreateBuyOfferModal from "../components/CreateBuyOfferModal";
 import AccessBlocker from "../components/accessBlocker";
 import { createManualBuyTransaction } from "../services/transactions/manualBuyTx";
+import { createModifyBuyOfferTransaction } from "../services/transactions/modifyBuyOfferTx";
+import { createCancelBuyOfferTransaction } from "../services/transactions/cancelBuyOfferTx";
+import ModifyPriceModal from "../components/ModifyPriceModal";
 
 import type { SellOffer, BuyOffer } from "../types/marketTypes";
 import { getOffersByProductId } from "../mocks/marketMockData";
@@ -55,8 +58,10 @@ const ProductsPage: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToOffer, setProductToOffer] = useState<Product | null>(null);
   const [offerToEdit, setOfferToEdit] = useState<BuyOffer | null>(null);
-  const [shopPurchases, setShopPurchases] = useState<any[]>([]); 
-  
+  const [shopPurchases, setShopPurchases] = useState<any[]>([]);
+  const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+  const [offerToModify, setOfferToModify] = useState<BuyOffer | null>(null);
+
 
   const handleViewDetails = (product: Product) => {
     setSelectedProduct(product);
@@ -294,6 +299,91 @@ const ProductsPage: FC = () => {
       }
   };
 
+  const handleModifyBuyOffer = (offer: BuyOffer) => {
+      setOfferToModify(offer);
+      setIsModifyModalOpen(true);
+  };
+
+  const handleConfirmModifyPrice = async (newPrice: number) => {
+      try {
+          if (!offerToModify) throw new Error("No offer selected for modification");
+          if (!currentAddress) throw new Error("Wallet not connected");
+
+          console.log(`📝 Modifying buy offer ${offerToModify.id} to price RON ${newPrice}`);
+
+          const tx = createModifyBuyOfferTransaction({
+              client: suiClient,
+              currentAddress: currentAddress,
+              buyOfferId: offerToModify.id,
+              newPrice: newPrice,
+              PRICELESS_PACKAGE: CONFIG.PRICELESS_PACKAGE,
+              PLATFORM_REGISTRY: CONFIG.PLATFORM_REGISTRY,
+              RON_PACKAGE_ID: CONFIG.RON_PACKAGE_ID,
+          });
+
+          const result = await signAndExecute({
+              transaction: tx,
+              options: {
+                  showEvents: true,
+                  showObjectChanges: true,
+                  showEffects: true,
+              },
+          } as any);
+
+          const digest = (result as any)?.digest;
+          if (!digest) throw new Error('Transaction failed: No digest returned');
+
+          console.log(`✅ Modify transaction successful! Digest: ${digest}`);
+          alert(`Successfully modified buy offer price to RON ${newPrice.toFixed(2)}`);
+          setIsModifyModalOpen(false);
+          setOfferToModify(null);
+
+      } catch (error) {
+          console.error("Modify offer error:", error);
+          alert(`Transaction Failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+  };
+
+  const handleCancelBuyOffer = async (offer: BuyOffer) => {
+      if (!confirm(`Are you sure you want to cancel this buy offer?`)) return;
+
+      try {
+          if (!userId) throw new Error("User ID not found");
+          if (!currentAddress) throw new Error("Wallet not connected");
+
+          console.log(`🗑️ Cancelling buy offer ${offer.id}`);
+
+          const tx = createCancelBuyOfferTransaction({
+              client: suiClient,
+              currentAddress: currentAddress,
+              buyOfferId: offer.id,
+              userAddress: userId,
+              PRICELESS_PACKAGE: CONFIG.PRICELESS_PACKAGE,
+              PLATFORM_REGISTRY: CONFIG.PLATFORM_REGISTRY,
+              RON_PACKAGE_ID: CONFIG.RON_PACKAGE_ID,
+          });
+
+          const result = await signAndExecute({
+              transaction: tx,
+              options: {
+                  showEvents: true,
+                  showObjectChanges: true,
+                  showEffects: true,
+              },
+          } as any);
+
+          const digest = (result as any)?.digest;
+          if (!digest) throw new Error('Transaction failed: No digest returned');
+
+          console.log(`✅ Cancel transaction successful! Digest: ${digest}`);
+          alert(`Successfully cancelled buy offer`);
+
+      } catch (error) {
+          console.error("Cancel offer error:", error);
+          alert(`Transaction Failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+  };
+
   // ===================================================================
   // 1. BLOCUL DE VERIFICARE A ACCESULUI (PRIORITATE MAXIMĂ)
   // ===================================================================
@@ -323,19 +413,28 @@ const ProductsPage: FC = () => {
                 onCreateBuyOffer={handleCreateBuyOffer}
                 onBuySellOffer={handleBuySellOffer}
                 onUpdateBuyOffer={handleUpdateBuyOffer}
-                onDeleteBuyOffer={handleDeleteBuyOffer}
+                onDeleteBuyOffer={handleCancelBuyOffer}
+                onModifyBuyOffer={handleModifyBuyOffer}
                 sellOffers={sellOffers}
                 buyOffers={buyOffers}
             />
         </div>
-        
-        {/* Modalul */}
+
+        {/* Modify Price Modal */}
+        <ModifyPriceModal
+            isOpen={isModifyModalOpen}
+            offer={offerToModify}
+            onClose={() => setIsModifyModalOpen(false)}
+            onConfirm={handleConfirmModifyPrice}
+        />
+
+        {/* Create/Edit Buy Offer Modal */}
         {isModalOpen && productToOffer && (
             <CreateBuyOfferModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 product={productToOffer}
-                offerToEdit={offerToEdit} 
+                offerToEdit={offerToEdit}
                 onConfirm={handleConfirmBuyOffer}
             />
         )}

@@ -1,6 +1,6 @@
 // src/components/ProductCardOffersPanel.tsx
 
-import { Plus, Calendar, Target } from "lucide-react";
+import { Plus, Calendar, Target, Edit, Trash2 } from "lucide-react";
 import type { FC } from "react";
 import type { Product } from "../types";
 import type { SellOffer, BuyOffer } from "../types/marketTypes";
@@ -11,18 +11,20 @@ interface ProductCardOffersPanelProps {
   buyOffers: BuyOffer[];
   onCreateBuyOffer: (product: Product) => void;
   onBuySellOffer: (offer: SellOffer) => void;
-  onUpdateBuyOffer: (offer: BuyOffer) => void;
+  onUpdateBuyOffer?: (offer: BuyOffer) => void;
   onDeleteBuyOffer: (offer: BuyOffer) => void;
+  onModifyBuyOffer?: (offer: BuyOffer) => void;
 }
 
-const ProductCardOffersPanel: FC<ProductCardOffersPanelProps> = ({ 
-    product, 
-    sellOffers, 
-    buyOffers,  
+const ProductCardOffersPanel: FC<ProductCardOffersPanelProps> = ({
+    product,
+    sellOffers,
+    buyOffers,
     onCreateBuyOffer,
     onBuySellOffer,
     onUpdateBuyOffer,
-    onDeleteBuyOffer
+    onDeleteBuyOffer,
+    onModifyBuyOffer
 }) => {
   
   const formatRating = (rating: number) => {
@@ -77,9 +79,25 @@ const ProductCardOffersPanel: FC<ProductCardOffersPanelProps> = ({
                 {buyOffers.map(offer => (
                     <div
                         key={offer.id}
-                        className="flex items-center p-3 bg-indigo-100 rounded-lg border border-indigo-300 shadow-sm"
+                        className="flex items-center justify-between p-3 bg-indigo-100 rounded-lg border border-indigo-300 shadow-sm"
                     >
                         <BuyOfferDisplay offer={offer} />
+                        <div className="flex gap-2 ml-4">
+                            <button
+                                onClick={() => onModifyBuyOffer?.(offer)}
+                                className="py-1 px-3 bg-blue-500 text-white rounded-lg font-semibold text-sm hover:bg-blue-600 transition flex items-center gap-1"
+                                title="Modify offer"
+                            >
+                                <Edit size={16} /> Modify
+                            </button>
+                            <button
+                                onClick={() => onDeleteBuyOffer(offer)}
+                                className="py-1 px-3 bg-red-500 text-white rounded-lg font-semibold text-sm hover:bg-red-600 transition flex items-center gap-1"
+                                title="Cancel order"
+                            >
+                                <Trash2 size={16} /> Cancel
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>

@@ -19,9 +19,10 @@ interface ProductDetailViewProps {
   onBack: () => void;
   onCreateBuyOffer: (product: Product) => void;
   onBuySellOffer: (offer: SellOffer) => void;
-  onUpdateBuyOffer: (offer: BuyOffer) => void;
+  onUpdateBuyOffer?: (offer: BuyOffer) => void;
   onDeleteBuyOffer: (offer: BuyOffer) => void;
-  
+  onModifyBuyOffer?: (offer: BuyOffer) => void;
+
   sellOffers: SellOffer[];
   buyOffers: BuyOffer[];
 }
@@ -33,8 +34,9 @@ const ProductDetailView: FC<ProductDetailViewProps> = ({
   onBuySellOffer,
   onUpdateBuyOffer,
   onDeleteBuyOffer,
-  sellOffers, 
-  buyOffers,  
+  onModifyBuyOffer,
+  sellOffers,
+  buyOffers,
 }) => {
   
   // Găsirea celei mai bune oferte pentru butonul Quick Buy
@@ -104,14 +106,15 @@ const ProductDetailView: FC<ProductDetailViewProps> = ({
         
         {/* --- Secțiunea de Liste de Oferte (Panoul Principal) --- */}
         <div className="mt-10">
-          <ProductCardOffersPanel // ⬅️ ACEASTA ESTE COMPONENTA CHEIE
+          <ProductCardOffersPanel
             product={product}
             sellOffers={sellOffers}
             buyOffers={buyOffers}
             onCreateBuyOffer={onCreateBuyOffer}
             onBuySellOffer={onBuySellOffer}
-            onUpdateBuyOffer={onUpdateBuyOffer} 
-            onDeleteBuyOffer={onDeleteBuyOffer} 
+            onUpdateBuyOffer={onUpdateBuyOffer}
+            onDeleteBuyOffer={onDeleteBuyOffer}
+            onModifyBuyOffer={onModifyBuyOffer}
           />
         </div>
       </div>

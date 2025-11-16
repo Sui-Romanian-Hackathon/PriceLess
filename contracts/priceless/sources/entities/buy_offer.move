@@ -21,8 +21,8 @@ module priceless::buy_offer {
         owner: address,
         product: String,
         price: Balance<RON>,
-        sell_offers: Table<ID, SellOffer>,
-        sell_offers_owner_ids: vector<ID>,
+        sell_offers: Table<ID, SellOffer>,  // ID is agent_id
+        sell_offers_owner_ids: vector<ID>,  // ID is agent_id
         offer_type: BuyOfferType,
         deadline: u64,
     }

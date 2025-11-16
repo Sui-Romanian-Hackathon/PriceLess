@@ -198,8 +198,8 @@ module priceless::core_logic {
             false => {
                 let new_sell_offer = new_sell_offer(agent_id, store_link, price, clock, ctx);
                 let sell_offer_id = object::id(&new_sell_offer);
-                table::add(get_sell_offers_table_mut(&mut buy_offer), sell_offer_id, new_sell_offer);
-                vector::push_back(get_sell_offers_owner_ids_mut(&mut buy_offer), sell_offer_id);
+                table::add(get_sell_offers_table_mut(&mut buy_offer), agent_id, new_sell_offer);
+                vector::push_back(get_sell_offers_owner_ids_mut(&mut buy_offer), agent_id);
                 sell_offer_id
             }
         };
@@ -254,9 +254,10 @@ module priceless::core_logic {
         };
 
         // Make sure the final price is the sell_offer price  + fee    
+        let agent_id = object::id(agent);
         let mut buy_offer_owned = remove_buy_offer_from_platform_registry(platform_registry, buy_offer_id);    
         let mut buy_price_balance = get_buy_offer_price_balance(&mut buy_offer_owned);
-        let sell_offer = table::borrow(get_sell_offers_table(&buy_offer_owned), sell_offer_id);
+        let sell_offer = table::borrow(get_sell_offers_table(&buy_offer_owned), agent_id);
         let store_link = get_sell_offer_store_link(sell_offer);
 
 

@@ -1,8 +1,10 @@
 import { Router, Request, Response } from "express";
+import { prisma } from "../index";
 import { ShopPurchaseService } from "../services/shopPurchaseService";
 import { validateData, shopPurchaseCreationSchema } from "../utils/validation";
 import { getPaginationParams, calculatePaginationMeta } from "../utils/pagination";
 import { CreateShopPurchaseBody } from "../types";
+import { serializeBigInt } from "../utils/bigintSerializer";
 
 const router = Router();
 
@@ -19,18 +21,29 @@ router.post("/", async (req: Request, res: Response) => {
 
 // Get all shop purchases (with pagination)
 router.get("/", async (req: Request, res: Response) => {
+  console.log('📦 GET /api/shop-purchases called');
+
   const { page, limit } = req.query as { page?: string; limit?: string };
   const { skip, take } = getPaginationParams({
-    page: page ? parseInt(page) : undefined,
-    limit: limit ? parseInt(limit) : undefined,
+    page: page ? parseInt(page) : 1,
+    limit: limit ? parseInt(limit) : 50,
   });
 
+  console.log(`Pagination: skip=${skip}, take=${take}`);
+
+  // Direct query to see what's in the table
+  const allRecords = await prisma.shopPurchase.findMany();
+  console.log(`📊 Total ShopPurchase records in DB: ${allRecords.length}`);
+  console.log(`📋 All ShopPurchase records:`, JSON.stringify(allRecords, (key, value) => typeof value === 'bigint' ? value.toString() : value, 2));
+
   const { shopPurchases, total } = await ShopPurchaseService.getAllShopPurchases(skip, take);
+  console.log(`✅ Query returned: ${shopPurchases.length} records, total: ${total}`);
+
   const pagination = calculatePaginationMeta(total, Math.floor(skip / take) + 1, take);
 
   res.json({
     success: true,
-    data: shopPurchases,
+    data: serializeBigInt(shopPurchases),
     pagination,
     timestamp: new Date().toISOString(),
   });

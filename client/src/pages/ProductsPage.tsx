@@ -1,4 +1,4 @@
-import { useState, useMemo, type FC } from "react";
+import { useState, useMemo, useEffect, type FC } from "react";
 import { List, CornerUpLeft, User, LogOut } from "lucide-react";
 import { mockProducts } from "../mocks/mockProducts";
 import { useAuth } from "../context/AuthContext";
@@ -54,13 +54,35 @@ const ProductsPage: FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToOffer, setProductToOffer] = useState<Product | null>(null);
-  const [offerToEdit, setOfferToEdit] = useState<BuyOffer | null>(null); 
+  const [offerToEdit, setOfferToEdit] = useState<BuyOffer | null>(null);
+  const [shopPurchases, setShopPurchases] = useState<any[]>([]); 
   
 
   const handleViewDetails = (product: Product) => {
     setSelectedProduct(product);
     window.scrollTo(0, 0);
   };
+
+  // Fetch shop purchases when component mounts
+  useEffect(() => {
+    console.log('🛒 Fetching shop purchases...');
+    fetch('http://localhost:3000/api/shop-purchases')
+      .then(res => {
+        console.log('Shop purchases response status:', res.status);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('✅ Shop Purchases fetched:', data);
+        console.log('Shop purchases data:', data.data);
+        setShopPurchases(data.data || []);
+      })
+      .catch(err => {
+        console.error('❌ Error fetching shop purchases:', err);
+      });
+  }, []);
 
   const [sellOffersCache, setSellOffersCache] = useState<Map<string, SellOffer[]>>(new Map());
 
@@ -345,6 +367,7 @@ const ProductsPage: FC = () => {
         <h1 className="text-4xl font-bold text-gray-900 mb-10 text-center flex items-center justify-center">
           <List size={36} className="mr-3 text-blue-500" /> PriceLess Offers List
         </h1>
+
         <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {mockProducts.map(product => {
                   const { sellOffers, buyOffers } = getCombinedOffers(product.id);
@@ -361,8 +384,39 @@ const ProductsPage: FC = () => {
                   );
               })}
           </div>
+
+        {/* Shop Purchases Table */}
+        {shopPurchases.length > 0 && (
+          <div className="bg-white rounded-lg shadow-lg p-6 mt-10">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Your Purchases</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-blue-500 text-white">
+                    <th className="border p-3 text-left">Product</th>
+                    <th className="border p-3 text-left">Store Link</th>
+                    <th className="border p-3 text-left">Product Price (RON)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shopPurchases.map((purchase, index) => (
+                    <tr key={index} className="hover:bg-gray-50 border-b">
+                      <td className="border p-3 font-semibold">Automatic Deluxe Espresso Machine</td>
+                      <td className="border p-3">
+                        <a href={purchase.store_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                          {purchase.store_link}
+                        </a>
+                      </td>
+                      <td className="border p-3">RON {(Number(purchase.product_price) / 100).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
-      
+
       {/* Modalul */}
       {isModalOpen && productToOffer && (
           <CreateBuyOfferModal

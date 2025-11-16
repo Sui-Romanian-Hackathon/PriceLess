@@ -18,8 +18,8 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
 // Demo user wallet
 const USER_WALLET = "0xe84167595a4c2b113329dededb103be1029a7fe258cc725ad1ee637d59801b0a";
 
-const PRICE = 1300_00; // Price in RON tokens
-const STORE_LINK = 'https://example.com/product';
+const PRICE = 1100_00; // Price in RON tokens
+const STORE_LINK = 'https://example.com/linkB';
 
 async function makeSellOffer() {
     console.log(`Making Sell Offer (DEMO)`);

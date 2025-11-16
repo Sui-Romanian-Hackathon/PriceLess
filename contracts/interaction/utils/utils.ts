@@ -85,12 +85,18 @@ export async function checkBalance(client: SuiClient, address: string, minBalanc
  * Display transaction results in a consistent format
  */
 export function displayTransactionResults(result: any, operationName: string) {
-    console.log(`✅ ${operationName} successful!`);
+    console.log(`✅ ${operationName} submitted!`);
     console.log(`📋 Transaction Digest: ${result.digest}`);
 
-    if (result.effects?.status?.status === 'success') {
+    // Check transaction status - handle both response formats
+    const status = result.effects?.status?.status || result.effects?.status;
+    const isSuccess = status === 'success' || (typeof status === 'object' && status.status === 'success');
+
+    console.log(`📊 Transaction Status:`, JSON.stringify(status, null, 2));
+
+    if (isSuccess) {
         console.log(`🎉 ${operationName} completed successfully!`);
-        
+
         // Display events if any
         if (result.events && result.events.length > 0) {
             console.log('\n📋 Events:');
@@ -110,10 +116,11 @@ export function displayTransactionResults(result: any, operationName: string) {
                 }
             });
         }
-        
+
         return true;
     } else {
-        console.error('❌ Transaction failed:', result.effects?.status);
+        console.error('❌ Transaction failed or aborted');
+        console.error('❌ Full Status Object:', JSON.stringify(result.effects?.status, null, 2));
         return false;
     }
 }
